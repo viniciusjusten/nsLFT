@@ -1,0 +1,10 @@
+name = "nsLFT"
+uuid = "bb55c95c-db71-48c0-b386-b62a768a3643"
+authors = ["viniciusjusten <viniciusjusten@psr-inc.com>"]
+version = "0.1.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
