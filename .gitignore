@@ -21,5 +21,9 @@ docs/site/
 LocalPreferences.toml
 JuliaLocalPreferences.toml
 
+# Environments of the development tools
+format/Manifest.toml
+revise/Manifest.toml
+
 # Simulation outputs written by write_results
 **/results/*.csv
