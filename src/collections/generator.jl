@@ -19,6 +19,9 @@ mutable struct ClassicGenerator <: Generator
     # Power flow solution
     P0::Float64 # active power at the terminal, in pu
     Q0::Float64 # reactive power at the terminal, in pu
+
+    # Cache
+    tripped::Bool # indicates if the generator has been tripped
 end
 
 function ClassicGenerator(;
@@ -32,6 +35,7 @@ function ClassicGenerator(;
     D::Float64,
     P0::Float64,
     Q0::Float64,
+    tripped::Bool = false,
 )
     return ClassicGenerator(
         name,
@@ -44,6 +48,7 @@ function ClassicGenerator(;
         D,
         P0,
         Q0,
+        tripped,
     )
 end
 
@@ -66,6 +71,8 @@ generator_D(inputs, idx::Int) = inputs.generators[idx].D * generator_Sn(inputs, 
 generator_P0(inputs, idx::Int) = inputs.generators[idx].P0
 
 generator_Q0(inputs, idx::Int) = inputs.generators[idx].Q0
+
+generator_tripped(inputs, idx::Int) = inputs.generators[idx].tripped
 
 function generator_impedance(inputs, gen_idx::Int)
     return generator_Ra(inputs, gen_idx) + im * generator_Xd_prime(inputs, gen_idx)

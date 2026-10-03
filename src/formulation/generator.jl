@@ -53,6 +53,9 @@ function step_delta!(inputs::Inputs, results::Results, gen_idx::Int, ts::Int)
 end
 
 function electrical_power(inputs::Inputs, results::Results, gen_idx::Int, ts::Int)
+    if generator_tripped(inputs, gen_idx)
+        return 0.0
+    end
     bus_idx = generator_bus(inputs, gen_idx)
     V = results.bus[bus_idx].Vr[ts] + im * results.bus[bus_idx].Vi[ts]
     delta = results.generator[gen_idx].delta[ts]

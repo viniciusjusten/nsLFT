@@ -26,9 +26,16 @@ load_P0(inputs, idx::Int) = inputs.loads[idx].P0
 
 load_Q0(inputs, idx::Int) = inputs.loads[idx].Q0
 
+function load_constant_admittance(P::Float64, Q::Float64, V::Float64)
+    # a constant admittance draws S = |V|^2 * conj(Y), so Y = conj(S) / |V|^2
+    return (P - im * Q) / V^2
+end
+
 function load_admittance(inputs, idx::Int)
     # a constant admittance draws S = |V|^2 * conj(Y), so Y = conj(S) / |V|^2
     # evaluated at the power flow voltage magnitude of the load bus
-    voltage = bus_voltage(inputs, load_bus(inputs, idx))
-    return (load_P0(inputs, idx) - im * load_Q0(inputs, idx)) / voltage^2
+    P = load_P0(inputs, idx)
+    Q = load_Q0(inputs, idx)
+    V = bus_voltage(inputs, load_bus(inputs, idx))
+    return load_constant_admittance(P, Q, V)
 end

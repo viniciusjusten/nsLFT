@@ -44,6 +44,8 @@ end
 function step!(inputs::Inputs, results::Results, ts::Int)
     caches = StepCache(inputs)
 
+    cache_Ybus!(inputs, ts) # update the Ybus and Zbus caches if there are any perturbations at this time step
+
     for gen_idx in 1:num_generators(inputs)
         predict_omega!(inputs, results, gen_idx, ts)
         predict_delta!(inputs, results, gen_idx, ts)

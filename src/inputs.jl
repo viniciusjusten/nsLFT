@@ -15,8 +15,9 @@ mutable struct Inputs
     loads::Vector{Load}
     perturbations::Vector{Perturbation}
 
-    Ybus_cache::Dict{Int, Matrix{ComplexF64}} # admittance matrix by time step right after each event
-    Zbus_cache::Dict{Int, Matrix{ComplexF64}} # impedance matrix by time step right after each event
+    base_Ybus::Matrix{ComplexF64} # admittance matrix of the base network topology, without any perturbation
+    Ybus_cache::Matrix{ComplexF64} # admittance matrix of the current network topology, overwritten at each event
+    Zbus_cache::Matrix{ComplexF64} # impedance matrix of the current network topology, overwritten at each event
 end
 
 function Inputs(;
@@ -32,8 +33,9 @@ function Inputs(;
     generators::Vector{Generator} = Generator[],
     loads::Vector{Load} = Load[],
     perturbations::Vector{Perturbation} = Perturbation[],
-    Ybus_cache::Dict{Int, Matrix{ComplexF64}} = Dict{Int, Matrix{ComplexF64}}(),
-    Zbus_cache::Dict{Int, Matrix{ComplexF64}} = Dict{Int, Matrix{ComplexF64}}(),
+    base_Ybus::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
+    Ybus_cache::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
+    Zbus_cache::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
 )
     return Inputs(
         case_path,
@@ -48,6 +50,7 @@ function Inputs(;
         generators,
         loads,
         perturbations,
+        base_Ybus,
         Ybus_cache,
         Zbus_cache,
     )
@@ -70,6 +73,8 @@ max_iterations(inputs::Inputs) = inputs.max_iterations
 function num_time_steps(inputs::Inputs)
     return round(Int, simulation_horizon(inputs) / integration_step(inputs))
 end
+
+base_Ybus(inputs::Inputs) = inputs.base_Ybus
 
 Ybus_cache(inputs::Inputs) = inputs.Ybus_cache
 
@@ -94,3 +99,11 @@ num_generators(inputs::Inputs) = length(inputs.generators)
 num_loads(inputs::Inputs) = length(inputs.loads)
 
 num_perturbations(inputs::Inputs) = length(inputs.perturbations)
+
+function perturbations_at(inputs::Inputs, ts::Int)
+    # round instead of comparing floats, since time / integration_step is rarely an exact integer
+    return filter(
+        perturbation -> round(Int, perturbation_time(perturbation) / integration_step(inputs)) == ts,
+        inputs.perturbations,
+    )
+end

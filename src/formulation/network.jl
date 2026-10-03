@@ -26,7 +26,7 @@ function admittance_matrix(inputs::Inputs)
     return Y
 end
 
-function solve_network!(inputs::Inputs, results::Results, ts::Int)
+function cache_Ybus!(inputs::Inputs, ts::Int)
     # if there is no admittance matrix cached, compute and cache it
     if isempty(inputs.Ybus_cache)
         Ybus = admittance_matrix(inputs)
@@ -39,27 +39,41 @@ function solve_network!(inputs::Inputs, results::Results, ts::Int)
             bus_idx = load_bus(inputs, load_idx)
             Ybus[bus_idx, bus_idx] += load_admittance(inputs, load_idx)
         end
-        inputs.Ybus_cache[ts] = Ybus
-        inputs.Zbus_cache[ts] = inv(Ybus)
+        inputs.base_Ybus = Ybus
+        inputs.Ybus_cache = Ybus
+        inputs.Zbus_cache = inv(Ybus)
     end
 
-    # TODO - check if current time step is at an event, and if so, update the admittance matrix
-    # Ybus = admittance_matrix(inputs)
+    # Check if current time step is at an event, and if so, update the admittance matrix
+    current_perturbations = perturbations_at(inputs, ts)
+    for (i, perturbation) in enumerate(current_perturbations)
+        if i == 1
+            # reset the Ybus cache to the base Ybus before applying perturbations
+            inputs.Ybus_cache = copy(inputs.base_Ybus)
+        end
+        apply_perturbation!(inputs, perturbation)
+    end
+    if !isempty(current_perturbations)
+        inputs.Zbus_cache = inv(inputs.Ybus_cache)
+    end
 
+    return nothing
+end
+
+function solve_network!(inputs::Inputs, results::Results, ts::Int)
     # The current vector I only includes the E / Zg contributions from generators. Ig = (E - V) / Zg, and
     # V / Zg is already included in the Ybus matrix. Il = - V / Zl,
     # and the load contributions are already included in the Ybus matrix.
     I = zeros(ComplexF64, num_buses(inputs))
     for (gen_idx, gen) in enumerate(inputs.generators)
-        bus_idx = generator_bus(inputs, gen_idx)
-        delta = results.generator[gen_idx].delta[ts+1]
-        E = results.generator[gen_idx].Eq_prime * cis(delta)
-        I[bus_idx] += E * generator_admittance(inputs, gen_idx)
+        if !generator_tripped(inputs, gen_idx)
+            bus_idx = generator_bus(inputs, gen_idx)
+            delta = results.generator[gen_idx].delta[ts+1]
+            E = results.generator[gen_idx].Eq_prime * cis(delta)
+            I[bus_idx] += E * generator_admittance(inputs, gen_idx)
+        end
     end
-    matrix_indices = sort(collect(keys(inputs.Ybus_cache)))
-    matrix_idx = findlast(x -> x <= ts, matrix_indices)
-    Zbus = inputs.Zbus_cache[matrix_indices[matrix_idx]]
-    V = Zbus * I
+    V = inputs.Zbus_cache * I
 
     for bus_idx in 1:num_buses(inputs)
         results.bus[bus_idx].Vr[ts+1] = real(V[bus_idx])
