@@ -7,6 +7,9 @@ mutable struct Bus
     voltage::Float64 # voltage magnitude at the power flow solution, in pu
     angle::Float64 # voltage angle at the power flow solution, in rad
     shunt_susceptance::Float64 # shunt susceptance, in pu
+
+    # Cache
+    fault_admittance::ComplexF64 # shunt admittance of an applied short circuit, zero without a fault, in pu
 end
 
 function Bus(;
@@ -24,6 +27,7 @@ function Bus(;
         voltage,
         angle,
         shunt_susceptance,
+        0.0 + 0.0im,
     )
 end
 
@@ -38,3 +42,5 @@ bus_voltage(inputs, idx::Int) = inputs.buses[idx].voltage
 bus_angle(inputs, idx::Int) = inputs.buses[idx].angle
 
 bus_shunt_susceptance(inputs, idx::Int) = inputs.buses[idx].shunt_susceptance
+
+bus_fault_admittance(inputs, idx::Int) = inputs.buses[idx].fault_admittance

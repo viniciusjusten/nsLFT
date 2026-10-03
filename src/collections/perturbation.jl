@@ -38,7 +38,8 @@ perturbation_fault_susceptance(perturbation::ShortCircuit) = perturbation.fault_
 
 function apply_perturbation!(inputs, perturbation::ShortCircuit)
     bus_idx = perturbation_bus_idx(perturbation)
-    inputs.Ybus_cache[bus_idx, bus_idx] += perturbation_fault_conductance(perturbation) + im * perturbation_fault_susceptance(perturbation)
+    inputs.buses[bus_idx].fault_admittance =
+        perturbation_fault_conductance(perturbation) + im * perturbation_fault_susceptance(perturbation)
     return nothing
 end
 
@@ -60,7 +61,8 @@ end
 perturbation_short_circuit_idx(perturbation::ShortCircuitRemoval) = perturbation.short_circuit_idx
 
 function apply_perturbation!(inputs, perturbation::ShortCircuitRemoval)
-    # the removal of a short circuit is the same as rewriting the admittance matrix without the short circuit
+    short_circuit = inputs.perturbations[perturbation_short_circuit_idx(perturbation)]
+    inputs.buses[perturbation_bus_idx(short_circuit)].fault_admittance = 0.0 + 0.0im
     return nothing
 end
 
@@ -82,16 +84,7 @@ end
 perturbation_circuit_idx(perturbation::CircuitTrip) = perturbation.circuit_idx
 
 function apply_perturbation!(inputs, perturbation::CircuitTrip)
-    circuit_idx = perturbation_circuit_idx(perturbation)
-    from_bus_idx = circuit_from_bus_idx(inputs, circuit_idx)
-    to_bus_idx = circuit_to_bus_idx(inputs, circuit_idx)
-    tap = circuit_tap_ratio(inputs, circuit_idx)
-    y = admittance(circuit_resistance(inputs, circuit_idx), circuit_reactance(inputs, circuit_idx))
-    y_shunt = circuit_shunt_conductance(inputs, circuit_idx) + im * circuit_shunt_susceptance(inputs, circuit_idx)
-    inputs.Ybus_cache[from_bus_idx, from_bus_idx] -= y * tap^2 + y_shunt / 2
-    inputs.Ybus_cache[to_bus_idx, to_bus_idx] -= y + y_shunt / 2
-    inputs.Ybus_cache[from_bus_idx, to_bus_idx] += y * tap
-    inputs.Ybus_cache[to_bus_idx, from_bus_idx] += y * tap
+    inputs.circuits[perturbation_circuit_idx(perturbation)].in_service = false
     return nothing
 end
 
@@ -113,10 +106,7 @@ end
 perturbation_generator_idx(perturbation::GeneratorTrip) = perturbation.generator_idx
 
 function apply_perturbation!(inputs, perturbation::GeneratorTrip)
-    generator_idx = perturbation_generator_idx(perturbation)
-    bus_idx = generator_bus(inputs, generator_idx)
-    inputs.Ybus_cache[bus_idx, bus_idx] -= generator_admittance(inputs, generator_idx) # TODO change according to the generator model
-    inputs.generators[generator_idx].tripped = true
+    inputs.generators[perturbation_generator_idx(perturbation)].tripped = true
     return nothing
 end
 
@@ -147,14 +137,8 @@ perturbation_new_p0(perturbation::LoadChange) = perturbation.new_p0
 perturbation_new_q0(perturbation::LoadChange) = perturbation.new_q0
 
 function apply_perturbation!(inputs, perturbation::LoadChange)
-    load_idx = perturbation_load_idx(perturbation)
-    bus_idx = load_bus(inputs, load_idx)
-    inputs.Ybus_cache[bus_idx, bus_idx] -= load_admittance(inputs, load_idx)
-    new_admittance = load_constant_admittance(
-        perturbation_new_p0(perturbation),
-        perturbation_new_q0(perturbation),
-        bus_voltage(inputs, bus_idx),
-    )
-    inputs.Ybus_cache[bus_idx, bus_idx] += new_admittance
+    load = inputs.loads[perturbation_load_idx(perturbation)]
+    load.P = perturbation_new_p0(perturbation)
+    load.Q = perturbation_new_q0(perturbation)
     return nothing
 end

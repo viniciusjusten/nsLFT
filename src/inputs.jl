@@ -15,9 +15,8 @@ mutable struct Inputs
     loads::Vector{Load}
     perturbations::Vector{Perturbation}
 
-    base_Ybus::Matrix{ComplexF64} # admittance matrix of the base network topology, without any perturbation
-    Ybus_cache::Matrix{ComplexF64} # admittance matrix of the current network topology, overwritten at each event
-    Zbus_cache::Matrix{ComplexF64} # impedance matrix of the current network topology, overwritten at each event
+    Ybus_cache::SparseMatrixCSC{ComplexF64, Int} # admittance matrix of the current state of the elements, rebuilt at each event
+    Ybus_lu::Union{Nothing, SparseArrays.UMFPACK.UmfpackLU{ComplexF64, Int}} # LU factorization of Ybus_cache, refactored at each event
 end
 
 function Inputs(;
@@ -33,9 +32,8 @@ function Inputs(;
     generators::Vector{Generator} = Generator[],
     loads::Vector{Load} = Load[],
     perturbations::Vector{Perturbation} = Perturbation[],
-    base_Ybus::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
-    Ybus_cache::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
-    Zbus_cache::Matrix{ComplexF64} = Matrix{ComplexF64}(undef, 0, 0),
+    Ybus_cache::SparseMatrixCSC{ComplexF64, Int} = spzeros(ComplexF64, 0, 0),
+    Ybus_lu::Union{Nothing, SparseArrays.UMFPACK.UmfpackLU{ComplexF64, Int}} = nothing,
 )
     return Inputs(
         case_path,
@@ -50,9 +48,8 @@ function Inputs(;
         generators,
         loads,
         perturbations,
-        base_Ybus,
         Ybus_cache,
-        Zbus_cache,
+        Ybus_lu,
     )
 end
 
@@ -74,11 +71,9 @@ function num_time_steps(inputs::Inputs)
     return round(Int, simulation_horizon(inputs) / integration_step(inputs))
 end
 
-base_Ybus(inputs::Inputs) = inputs.base_Ybus
-
 Ybus_cache(inputs::Inputs) = inputs.Ybus_cache
 
-Zbus_cache(inputs::Inputs) = inputs.Zbus_cache
+Ybus_lu(inputs::Inputs) = inputs.Ybus_lu
 
 bus(inputs::Inputs, idx::Int) = inputs.buses[idx]
 

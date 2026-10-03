@@ -9,6 +9,9 @@ mutable struct Circuit
     shunt_conductance::Float64 # total shunt conductance, in pu
     shunt_susceptance::Float64 # total shunt susceptance, in pu
     tap_ratio::Float64 # transformer tap ratio, in pu
+
+    # Cache
+    in_service::Bool # indicates if the circuit is connected, false after a trip
 end
 
 function Circuit(;
@@ -30,6 +33,7 @@ function Circuit(;
         shunt_conductance,
         shunt_susceptance,
         tap_ratio,
+        true,
     )
 end
 
@@ -48,3 +52,5 @@ circuit_shunt_conductance(inputs, idx::Int) = inputs.circuits[idx].shunt_conduct
 circuit_shunt_susceptance(inputs, idx::Int) = inputs.circuits[idx].shunt_susceptance
 
 circuit_tap_ratio(inputs, idx::Int) = inputs.circuits[idx].tap_ratio
+
+circuit_in_service(inputs, idx::Int) = inputs.circuits[idx].in_service

@@ -27,4 +27,13 @@
     @test nsLFT.generator_tripped(inputs, ug2_idx)
     @test all(ug2.Pele[after_trip] .== 0.0)
     @test ug2.omega[end] > 1.0
+
+    # the initialization undoes the trip, so a second simulation of the same inputs gives the same results
+    rerun_results = nsLFT.solve(inputs)
+    for gen_idx in 1:nsLFT.num_generators(inputs)
+        @test rerun_results.generator[gen_idx].delta == results.generator[gen_idx].delta
+    end
+    for bus_idx in 1:nsLFT.num_buses(inputs)
+        @test rerun_results.bus[bus_idx].Vr == results.bus[bus_idx].Vr
+    end
 end

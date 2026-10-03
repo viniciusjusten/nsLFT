@@ -35,7 +35,6 @@ function ClassicGenerator(;
     D::Float64,
     P0::Float64,
     Q0::Float64,
-    tripped::Bool = false,
 )
     return ClassicGenerator(
         name,
@@ -48,7 +47,7 @@ function ClassicGenerator(;
         D,
         P0,
         Q0,
-        tripped,
+        false,
     )
 end
 

@@ -1,5 +1,8 @@
 module nsLFT
 
+using LinearAlgebra
+using SparseArrays
+
 include("utils.jl")
 
 include("collections/bus.jl")
