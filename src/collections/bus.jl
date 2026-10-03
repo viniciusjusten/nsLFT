@@ -31,16 +31,16 @@ function Bus(;
     )
 end
 
-bus_name(inputs, idx::Int) = inputs.buses[idx].name
+bus_name(bus::Bus) = bus.name
 
-bus_generator_idx(inputs, idx::Int) = inputs.buses[idx].generator_idx
+bus_generator_idx(bus::Bus) = bus.generator_idx
 
-bus_load_idx(inputs, idx::Int) = inputs.buses[idx].load_idx
+bus_load_idx(bus::Bus) = bus.load_idx
 
-bus_voltage(inputs, idx::Int) = inputs.buses[idx].voltage
+bus_voltage(bus::Bus) = bus.voltage
 
-bus_angle(inputs, idx::Int) = inputs.buses[idx].angle
+bus_angle(bus::Bus) = bus.angle
 
-bus_shunt_susceptance(inputs, idx::Int) = inputs.buses[idx].shunt_susceptance
+bus_shunt_susceptance(bus::Bus) = bus.shunt_susceptance
 
-bus_fault_admittance(inputs, idx::Int) = inputs.buses[idx].fault_admittance
+bus_fault_admittance(bus::Bus) = bus.fault_admittance

@@ -37,20 +37,20 @@ function Circuit(;
     )
 end
 
-circuit_name(inputs, idx::Int) = inputs.circuits[idx].name
+circuit_name(circuit::Circuit) = circuit.name
 
-circuit_from_bus_idx(inputs, idx::Int) = inputs.circuits[idx].from_bus_idx
+circuit_from_bus_idx(circuit::Circuit) = circuit.from_bus_idx
 
-circuit_to_bus_idx(inputs, idx::Int) = inputs.circuits[idx].to_bus_idx
+circuit_to_bus_idx(circuit::Circuit) = circuit.to_bus_idx
 
-circuit_resistance(inputs, idx::Int) = inputs.circuits[idx].resistance
+circuit_resistance(circuit::Circuit) = circuit.resistance
 
-circuit_reactance(inputs, idx::Int) = inputs.circuits[idx].reactance
+circuit_reactance(circuit::Circuit) = circuit.reactance
 
-circuit_shunt_conductance(inputs, idx::Int) = inputs.circuits[idx].shunt_conductance
+circuit_shunt_conductance(circuit::Circuit) = circuit.shunt_conductance
 
-circuit_shunt_susceptance(inputs, idx::Int) = inputs.circuits[idx].shunt_susceptance
+circuit_shunt_susceptance(circuit::Circuit) = circuit.shunt_susceptance
 
-circuit_tap_ratio(inputs, idx::Int) = inputs.circuits[idx].tap_ratio
+circuit_tap_ratio(circuit::Circuit) = circuit.tap_ratio
 
-circuit_in_service(inputs, idx::Int) = inputs.circuits[idx].in_service
+circuit_in_service(circuit::Circuit) = circuit.in_service

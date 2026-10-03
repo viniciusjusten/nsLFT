@@ -1,8 +1,8 @@
 function initialize_buses!(inputs::Inputs, results::Results)
-    for bus_idx in 1:num_buses(inputs)
-        V0 = bus_voltage(inputs, bus_idx) * cis(bus_angle(inputs, bus_idx))
-        results.bus[bus_idx].Vr[1] = real(V0)
-        results.bus[bus_idx].Vi[1] = imag(V0)
+    for (bus, state) in zip(inputs.buses, results.bus)
+        V0 = bus_voltage(bus) * cis(bus_angle(bus))
+        state.Vr[1] = real(V0)
+        state.Vi[1] = imag(V0)
     end
     return nothing
 end
@@ -19,8 +19,8 @@ function reset_element_states!(inputs::Inputs)
         generator.tripped = false
     end
     for load in inputs.loads
-        load.P = load.P0
-        load.Q = load.Q0
+        load.P = load_P0(load)
+        load.Q = load_Q0(load)
     end
     return nothing
 end

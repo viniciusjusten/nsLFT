@@ -61,7 +61,7 @@ end
 perturbation_short_circuit_idx(perturbation::ShortCircuitRemoval) = perturbation.short_circuit_idx
 
 function apply_perturbation!(inputs, perturbation::ShortCircuitRemoval)
-    short_circuit = inputs.perturbations[perturbation_short_circuit_idx(perturbation)]
+    short_circuit = get_perturbation(inputs, perturbation_short_circuit_idx(perturbation))
     inputs.buses[perturbation_bus_idx(short_circuit)].fault_admittance = 0.0 + 0.0im
     return nothing
 end

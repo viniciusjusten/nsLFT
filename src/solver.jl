@@ -46,18 +46,18 @@ function step!(inputs::Inputs, results::Results, ts::Int)
 
     cache_Ybus!(inputs, ts) # update the Ybus cache and its LU factorization if there are any perturbations at this time step
 
-    for gen_idx in 1:num_generators(inputs)
-        predict_omega!(inputs, results, gen_idx, ts)
-        predict_delta!(inputs, results, gen_idx, ts)
+    for (generator, state) in zip(inputs.generators, results.generator)
+        predict_omega!(inputs, generator, state, ts)
+        predict_delta!(inputs, state, ts)
     end
     solve_network!(inputs, results, ts) # V[ts+1] and Pele[ts+1] from the predicted delta
 
     for iteration in 1:max_iterations(inputs)
         cache_step!(inputs, results, ts, caches) # delta, omega, Vr and Vi at ts+1
 
-        for gen_idx in 1:num_generators(inputs)
-            step_omega!(inputs, results, gen_idx, ts)
-            step_delta!(inputs, results, gen_idx, ts)
+        for (generator, state) in zip(inputs.generators, results.generator)
+            step_omega!(inputs, generator, state, ts)
+            step_delta!(inputs, state, ts)
         end
         solve_network!(inputs, results, ts)
 

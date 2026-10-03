@@ -75,15 +75,15 @@ Ybus_cache(inputs::Inputs) = inputs.Ybus_cache
 
 Ybus_lu(inputs::Inputs) = inputs.Ybus_lu
 
-bus(inputs::Inputs, idx::Int) = inputs.buses[idx]
+get_bus(inputs::Inputs, idx::Int) = inputs.buses[idx]
 
-circuit(inputs::Inputs, idx::Int) = inputs.circuits[idx]
+get_circuit(inputs::Inputs, idx::Int) = inputs.circuits[idx]
 
-generator(inputs::Inputs, idx::Int) = inputs.generators[idx]
+get_generator(inputs::Inputs, idx::Int) = inputs.generators[idx]
 
-load(inputs::Inputs, idx::Int) = inputs.loads[idx]
+get_load(inputs::Inputs, idx::Int) = inputs.loads[idx]
 
-perturbation(inputs::Inputs, idx::Int) = inputs.perturbations[idx]
+get_perturbation(inputs::Inputs, idx::Int) = inputs.perturbations[idx]
 
 num_buses(inputs::Inputs) = length(inputs.buses)
 

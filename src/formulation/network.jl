@@ -12,42 +12,42 @@ function admittance_matrix(inputs::Inputs)
     rows = Int[]
     cols = Int[]
     values = ComplexF64[]
-    for circuit_idx in 1:num_circuits(inputs)
-        from = circuit_from_bus_idx(inputs, circuit_idx)
-        to = circuit_to_bus_idx(inputs, circuit_idx)
-        tap = circuit_tap_ratio(inputs, circuit_idx)
+    for circuit in inputs.circuits
+        from = circuit_from_bus_idx(circuit)
+        to = circuit_to_bus_idx(circuit)
+        tap = circuit_tap_ratio(circuit)
         y = 0.0 + 0.0im
         y_shunt = 0.0 + 0.0im
-        if circuit_in_service(inputs, circuit_idx)
-            y = admittance(circuit_resistance(inputs, circuit_idx), circuit_reactance(inputs, circuit_idx))
+        if circuit_in_service(circuit)
+            y = admittance(circuit_resistance(circuit), circuit_reactance(circuit))
             # the circuit shunt is the total of the pi model, so each end gets half of it
-            y_shunt = circuit_shunt_conductance(inputs, circuit_idx) + im * circuit_shunt_susceptance(inputs, circuit_idx)
+            y_shunt = circuit_shunt_conductance(circuit) + im * circuit_shunt_susceptance(circuit)
         end
         append!(rows, [from, to, from, to])
         append!(cols, [from, to, to, from])
         append!(values, [y * tap^2 + y_shunt / 2, y + y_shunt / 2, -y * tap, -y * tap])
     end
 
-    for bus_idx in 1:n_buses
+    for (bus_idx, bus) in enumerate(inputs.buses)
         push!(rows, bus_idx)
         push!(cols, bus_idx)
-        push!(values, im * bus_shunt_susceptance(inputs, bus_idx) + bus_fault_admittance(inputs, bus_idx))
+        push!(values, im * bus_shunt_susceptance(bus) + bus_fault_admittance(bus))
     end
 
-    for gen_idx in 1:num_generators(inputs)
-        if !generator_tripped(inputs, gen_idx)
-            bus_idx = generator_bus(inputs, gen_idx)
+    for generator in inputs.generators
+        if !generator_tripped(generator)
+            bus_idx = generator_bus(generator)
             push!(rows, bus_idx)
             push!(cols, bus_idx)
-            push!(values, generator_admittance(inputs, gen_idx)) # TODO change according to the generator model
+            push!(values, generator_admittance(inputs, generator)) # TODO change according to the generator model
         end
     end
 
-    for load_idx in 1:num_loads(inputs)
-        bus_idx = load_bus(inputs, load_idx)
+    for load in inputs.loads
+        bus_idx = load_bus(load)
         push!(rows, bus_idx)
         push!(cols, bus_idx)
-        push!(values, load_admittance(inputs, load_idx))
+        push!(values, load_admittance(inputs, load))
     end
 
     return sparse(rows, cols, values, n_buses, n_buses)
@@ -78,23 +78,21 @@ function solve_network!(inputs::Inputs, results::Results, ts::Int)
     # V / Zg is already included in the Ybus matrix. Il = - V / Zl,
     # and the load contributions are already included in the Ybus matrix.
     I = zeros(ComplexF64, num_buses(inputs))
-    for (gen_idx, gen) in enumerate(inputs.generators)
-        if !generator_tripped(inputs, gen_idx)
-            bus_idx = generator_bus(inputs, gen_idx)
-            delta = results.generator[gen_idx].delta[ts+1]
-            E = results.generator[gen_idx].Eq_prime * cis(delta)
-            I[bus_idx] += E * generator_admittance(inputs, gen_idx)
+    for (generator, state) in zip(inputs.generators, results.generator)
+        if !generator_tripped(generator)
+            E = state.Eq_prime * cis(state.delta[ts+1])
+            I[generator_bus(generator)] += E * generator_admittance(inputs, generator)
         end
     end
     V = inputs.Ybus_lu \ I
 
-    for bus_idx in 1:num_buses(inputs)
-        results.bus[bus_idx].Vr[ts+1] = real(V[bus_idx])
-        results.bus[bus_idx].Vi[ts+1] = imag(V[bus_idx])
+    for (bus_idx, state) in enumerate(results.bus)
+        state.Vr[ts+1] = real(V[bus_idx])
+        state.Vi[ts+1] = imag(V[bus_idx])
     end
 
-    for gen_idx in 1:num_generators(inputs)
-        results.generator[gen_idx].Pele[ts+1] = electrical_power(inputs, results, gen_idx, ts+1)
+    for (generator, state) in zip(inputs.generators, results.generator)
+        state.Pele[ts+1] = electrical_power(inputs, results, generator, state, ts+1)
     end
 
     return nothing

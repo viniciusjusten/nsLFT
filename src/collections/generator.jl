@@ -51,32 +51,33 @@ function ClassicGenerator(;
     )
 end
 
-generator_name(inputs, idx::Int) = inputs.generators[idx].name
+generator_name(generator::Generator) = generator.name
 
-generator_bus(inputs, idx::Int) = inputs.generators[idx].bus
+generator_bus(generator::Generator) = generator.bus
 
-generator_Sn(inputs, idx::Int) = inputs.generators[idx].Sn
+generator_Sn(generator::Generator) = generator.Sn
 
-generator_Vn(inputs, idx::Int) = inputs.generators[idx].Vn
+generator_Vn(generator::Generator) = generator.Vn
 
-generator_Xd_prime(inputs, idx::Int) = inputs.generators[idx].Xd_prime * Sb(inputs) / generator_Sn(inputs, idx)
+# the parameters are given in the machine base and returned in the system base
+generator_Xd_prime(inputs, generator::ClassicGenerator) = generator.Xd_prime * Sb(inputs) / generator_Sn(generator)
 
-generator_Ra(inputs, idx::Int) = inputs.generators[idx].Ra * Sb(inputs) / generator_Sn(inputs, idx)
+generator_Ra(inputs, generator::ClassicGenerator) = generator.Ra * Sb(inputs) / generator_Sn(generator)
 
-generator_H(inputs, idx::Int) = inputs.generators[idx].H * generator_Sn(inputs, idx) / Sb(inputs)
+generator_H(inputs, generator::ClassicGenerator) = generator.H * generator_Sn(generator) / Sb(inputs)
 
-generator_D(inputs, idx::Int) = inputs.generators[idx].D * generator_Sn(inputs, idx) / Sb(inputs)
+generator_D(inputs, generator::ClassicGenerator) = generator.D * generator_Sn(generator) / Sb(inputs)
 
-generator_P0(inputs, idx::Int) = inputs.generators[idx].P0
+generator_P0(generator::Generator) = generator.P0
 
-generator_Q0(inputs, idx::Int) = inputs.generators[idx].Q0
+generator_Q0(generator::Generator) = generator.Q0
 
-generator_tripped(inputs, idx::Int) = inputs.generators[idx].tripped
+generator_tripped(generator::Generator) = generator.tripped
 
-function generator_impedance(inputs, gen_idx::Int)
-    return generator_Ra(inputs, gen_idx) + im * generator_Xd_prime(inputs, gen_idx)
+function generator_impedance(inputs, generator::ClassicGenerator)
+    return generator_Ra(inputs, generator) + im * generator_Xd_prime(inputs, generator)
 end
 
-function generator_admittance(inputs, gen_idx::Int)
-    return 1 / generator_impedance(inputs, gen_idx)
+function generator_admittance(inputs, generator::ClassicGenerator)
+    return 1 / generator_impedance(inputs, generator)
 end

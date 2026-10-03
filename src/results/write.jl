@@ -81,10 +81,10 @@ function write_results(inputs::Inputs, results::Results, output_path::String = j
     mkpath(output_path)
     time = time_values(inputs)
 
-    bus_names = [bus_name(inputs, bus_idx) for bus_idx in 1:num_buses(inputs)]
+    bus_names = [bus_name(bus) for bus in inputs.buses]
     write_class_results(inputs, output_path, "bus", time, bus_names, results.bus)
 
-    generator_names = [generator_name(inputs, gen_idx) for gen_idx in 1:num_generators(inputs)]
+    generator_names = [generator_name(generator) for generator in inputs.generators]
     write_class_results(inputs, output_path, "generator", time, generator_names, results.generator)
 
     return nothing

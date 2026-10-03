@@ -24,7 +24,7 @@
 
     # from the trip on UG2 delivers no power, so its mechanical power accelerates the rotor
     ug2 = results.generator[ug2_idx]
-    @test nsLFT.generator_tripped(inputs, ug2_idx)
+    @test nsLFT.generator_tripped(nsLFT.get_generator(inputs, ug2_idx))
     @test all(ug2.Pele[after_trip] .== 0.0)
     @test ug2.omega[end] > 1.0
 
