@@ -20,6 +20,9 @@ mutable struct ClassicGenerator <: Generator
     P0::Float64 # active power at the terminal, in pu
     Q0::Float64 # reactive power at the terminal, in pu
 
+    # Controls
+    governor::Union{Nothing, Governor} # speed governor, nothing keeps the mechanical power constant
+
     # Cache
     tripped::Bool # indicates if the generator has been tripped
 end
@@ -35,6 +38,7 @@ function ClassicGenerator(;
     D::Float64,
     P0::Float64,
     Q0::Float64,
+    governor::Union{Nothing, Governor} = nothing,
 )
     return ClassicGenerator(
         name,
@@ -47,6 +51,7 @@ function ClassicGenerator(;
         D,
         P0,
         Q0,
+        governor,
         false,
     )
 end
@@ -78,6 +83,9 @@ mutable struct OneDOneQGenerator <: Generator
     P0::Float64 # active power at the terminal, in pu
     Q0::Float64 # reactive power at the terminal, in pu
 
+    # Controls
+    governor::Union{Nothing, Governor} # speed governor, nothing keeps the mechanical power constant
+
     # Cache
     tripped::Bool # indicates if the generator has been tripped
 end
@@ -98,6 +106,7 @@ function OneDOneQGenerator(;
     D::Float64,
     P0::Float64,
     Q0::Float64,
+    governor::Union{Nothing, Governor} = nothing,
 )
     return OneDOneQGenerator(
         name,
@@ -115,6 +124,7 @@ function OneDOneQGenerator(;
         D,
         P0,
         Q0,
+        governor,
         false,
     )
 end
@@ -151,6 +161,10 @@ generator_P0(generator::Generator) = generator.P0
 generator_Q0(generator::Generator) = generator.Q0
 
 generator_tripped(generator::Generator) = generator.tripped
+
+generator_governor(generator::Generator) = generator.governor
+
+has_governor(generator::Generator) = !isnothing(generator.governor)
 
 function generator_impedance(inputs, generator::ClassicGenerator)
     return generator_Ra(inputs, generator) + im * generator_Xd_prime(inputs, generator)

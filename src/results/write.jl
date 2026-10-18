@@ -33,7 +33,7 @@ function output_units(inputs::Inputs, field::Symbol)
         return [("rad", 1.0), ("deg", 180 / pi)]
     elseif field == :omega
         return [("pu", 1.0), ("Hz", fb(inputs))]
-    elseif field == :Pmec || field == :Pele
+    elseif field == :Pmec || field == :Pref || field == :Pele
         return [("pu", 1.0), ("MW", Sb(inputs))]
     elseif field == :Eq_prime || field == :ed_prime || field == :eq_prime || field == :efd
         return [("pu", 1.0)]

@@ -1,5 +1,5 @@
 # the generator model is "classic" or "one_d_one_q", and the same model is used for every generator of the case
-function ieee14_generators(data_path::String, Sb::Float64, generator_model::String)
+function ieee14_generators(data_path::String, Sb::Float64, generator_model::String, gov::Bool = false)
     file_path = joinpath(data_path, "ieee14_generators.csv")
     generator_names = read_column(file_path, "name")
     generator_buses = read_integers(file_path, "bus")
@@ -54,6 +54,11 @@ function ieee14_generators(data_path::String, Sb::Float64, generator_model::Stri
         end
     else
         error("Unknown generator model $generator_model.")
+    end
+    if gov
+        for gen_idx in eachindex(generators)
+            generators[gen_idx].governor = nsLFT.Droop1stOrder("gov", 0.05, 2.0, 60.0)
+        end
     end
     return generators
 end
@@ -158,6 +163,7 @@ function ieee14_inputs(
     case_path::String;
     perturbations::Vector{<:nsLFT.Perturbation} = nsLFT.Perturbation[],
     generator_model::String = "classic",
+    gov::Bool = false,
 )
     Sb = 100.0
     fb = 60.0
@@ -170,24 +176,32 @@ function ieee14_inputs(
         tolerance = 1e-10,
         buses = ieee14_buses(data_path, Sb),
         circuits = ieee14_circuits(data_path),
-        generators = ieee14_generators(data_path, Sb, generator_model),
+        generators = ieee14_generators(data_path, Sb, generator_model, gov),
         loads = ieee14_loads(data_path, Sb),
         perturbations = perturbations,
     )
 end
 
-perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
-inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "classic")
-results = nsLFT.solve(inputs)
+# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "classic")
+# results = nsLFT.solve(inputs)
 
-perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
-inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-trip-ug2", perturbations = perturbations, generator_model = "classic")
-results = nsLFT.solve(inputs)
+# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-trip-ug2", perturbations = perturbations, generator_model = "classic")
+# results = nsLFT.solve(inputs)
 
-perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
-inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q")
-results = nsLFT.solve(inputs)
+# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q")
+# results = nsLFT.solve(inputs)
 
-perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
-inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q")
-results = nsLFT.solve(inputs)
+# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q")
+# results = nsLFT.solve(inputs)
+
+# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-gov-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q", gov = true)
+# results = nsLFT.solve(inputs)
+
+# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-gov-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q", gov = true)
+# results = nsLFT.solve(inputs)

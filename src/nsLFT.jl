@@ -7,6 +7,7 @@ include("utils.jl")
 
 include("collections/bus.jl")
 include("collections/circuit.jl")
+include("collections/governor.jl")
 include("collections/generator.jl")
 include("collections/load.jl")
 include("collections/perturbation.jl")
@@ -21,6 +22,7 @@ include("results/dashboard.jl")
 
 include("formulation/network.jl")
 include("formulation/generator.jl")
+include("formulation/governor.jl")
 
 include("initialization/generator.jl")
 include("initialization/initialization.jl")
