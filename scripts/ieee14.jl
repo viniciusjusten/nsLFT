@@ -1,4 +1,5 @@
-function ieee14_generators(data_path::String, Sb::Float64)
+# the generator model is "classic" or "one_d_one_q", and the same model is used for every generator of the case
+function ieee14_generators(data_path::String, Sb::Float64, generator_model::String)
     file_path = joinpath(data_path, "ieee14_generators.csv")
     generator_names = read_column(file_path, "name")
     generator_buses = read_integers(file_path, "bus")
@@ -11,19 +12,48 @@ function ieee14_generators(data_path::String, Sb::Float64)
     Q = read_numbers(file_path, "Q_Mvar")
 
     generators = nsLFT.Generator[]
-    for gen_idx in eachindex(generator_names)
-        push!(generators, nsLFT.ClassicGenerator(;
-            name = generator_names[gen_idx],
-            bus = generator_buses[gen_idx],
-            Sn = Sn[gen_idx],
-            Vn = NaN, # the case gives no rated voltage and the model does not use it yet
-            Xd_prime = Xd_prime[gen_idx],
-            Ra = Ra[gen_idx],
-            H = H[gen_idx],
-            D = D[gen_idx],
-            P0 = P[gen_idx] / Sb,
-            Q0 = Q[gen_idx] / Sb,
-        ))
+    if generator_model == "classic"
+        for gen_idx in eachindex(generator_names)
+            push!(generators, nsLFT.ClassicGenerator(;
+                name = generator_names[gen_idx],
+                bus = generator_buses[gen_idx],
+                Sn = Sn[gen_idx],
+                Vn = NaN, # the case gives no rated voltage and the model does not use it yet
+                Xd_prime = Xd_prime[gen_idx],
+                Ra = Ra[gen_idx],
+                H = H[gen_idx],
+                D = D[gen_idx],
+                P0 = P[gen_idx] / Sb,
+                Q0 = Q[gen_idx] / Sb,
+            ))
+        end
+    elseif generator_model == "one_d_one_q"
+        Xd = read_numbers(file_path, "Xd_pu")
+        Xq = read_numbers(file_path, "Xq_pu")
+        Xq_prime = read_numbers(file_path, "Xq1_pu")
+        Td0_prime = read_numbers(file_path, "Td01_s")
+        Tq0_prime = read_numbers(file_path, "Tq01_s")
+        for gen_idx in eachindex(generator_names)
+            push!(generators, nsLFT.OneDOneQGenerator(;
+                name = generator_names[gen_idx],
+                bus = generator_buses[gen_idx],
+                Sn = Sn[gen_idx],
+                Vn = NaN, # the case gives no rated voltage and the model does not use it yet
+                Xd = Xd[gen_idx],
+                Xd_prime = Xd_prime[gen_idx],
+                Xq = Xq[gen_idx],
+                Xq_prime = Xq_prime[gen_idx],
+                Ra = Ra[gen_idx],
+                Td0_prime = Td0_prime[gen_idx],
+                Tq0_prime = Tq0_prime[gen_idx],
+                H = H[gen_idx],
+                D = D[gen_idx],
+                P0 = P[gen_idx] / Sb,
+                Q0 = Q[gen_idx] / Sb,
+            ))
+        end
+    else
+        error("Unknown generator model $generator_model.")
     end
     return generators
 end
@@ -126,7 +156,8 @@ end
 function ieee14_inputs(
     data_path::String,
     case_path::String;
-    perturbations::Vector{nsLFT.Perturbation} = nsLFT.Perturbation[],
+    perturbations::Vector{<:nsLFT.Perturbation} = nsLFT.Perturbation[],
+    generator_model::String = "classic",
 )
     Sb = 100.0
     fb = 60.0
@@ -139,8 +170,24 @@ function ieee14_inputs(
         tolerance = 1e-10,
         buses = ieee14_buses(data_path, Sb),
         circuits = ieee14_circuits(data_path),
-        generators = ieee14_generators(data_path, Sb),
+        generators = ieee14_generators(data_path, Sb, generator_model),
         loads = ieee14_loads(data_path, Sb),
         perturbations = perturbations,
     )
 end
+
+# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "classic")
+# results = nsLFT.solve(inputs)
+
+# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-trip-ug2", perturbations = perturbations, generator_model = "classic")
+# results = nsLFT.solve(inputs)
+
+# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q")
+# results = nsLFT.solve(inputs)
+
+# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q")
+# results = nsLFT.solve(inputs)

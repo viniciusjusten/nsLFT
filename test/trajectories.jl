@@ -37,6 +37,26 @@ function model_trajectories(inputs::nsLFT.Inputs, results::nsLFT.Results)
     return column_names, columns
 end
 
+# The largest change accepted in a time series before the first perturbation. The OneDOneQ generator starts from
+# E' computed with the power flow current, which the network at t = 0 only reproduces to the precision of the
+# case data, so E' has derivatives of about 1e-8 at t = 0 and the operating point drifts slowly
+operating_point_tolerance() = 1e-6
+
+# Before the first perturbation every time series stays at its initial value, whatever the generator model.
+# Half a step of margin keeps the comparison from depending on the rounding of the time values
+function test_initial_operating_point_kept(inputs::nsLFT.Inputs, results::nsLFT.Results, first_event_time::Float64)
+    time = nsLFT.time_values(inputs)
+    margin = nsLFT.integration_step(inputs) / 2
+    before_event = time .< first_event_time - margin
+    names, columns = model_trajectories(inputs, results)
+    for (trajectory_name, trajectory) in zip(names, columns)
+        @testset "$trajectory_name before the perturbation" begin
+            @test maximum(abs.(trajectory[before_event] .- trajectory[1])) < operating_point_tolerance()
+        end
+    end
+    return nothing
+end
+
 function reference_trajectories(reference_trajectories_path::String)
     header_line = readline(reference_trajectories_path)
     header = split(header_line, ",")

@@ -57,14 +57,14 @@ end
 function deriv_ed_prime(inputs::Inputs, generator::OneDOneQGenerator, state::OneDOneQGeneratorState, ts::Int)
     return 1 / generator_Tq0_prime(generator) * (
         - state.ed_prime[ts] +
-        (generator_Xq(generator) - generator_Xq_prime(generator)) * state.iq[ts]
+        (generator_Xq(inputs, generator) - generator_Xq_prime(inputs, generator)) * state.iq[ts]
     )
 end
 
 function deriv_eq_prime(inputs::Inputs, generator::OneDOneQGenerator, state::OneDOneQGeneratorState, ts::Int)
     return 1 / generator_Td0_prime(generator) * (
         - state.eq_prime[ts] -
-        (generator_Xd(generator) - generator_Xd_prime(generator)) * state.id[ts] +
+        (generator_Xd(inputs, generator) - generator_Xd_prime(inputs, generator)) * state.id[ts] +
         state.efd[ts]
     )
 end
@@ -154,6 +154,8 @@ function generator_current(inputs::Inputs, results::Results, generator::OneDOneQ
 end
 
 function generator_current_network_contribution(inputs::Inputs, results::Results, generator::OneDOneQGenerator, state::OneDOneQGeneratorState, ts::Int)
+    # Ybus includes the generator admittance, so its current times V is added back here. The terms in V cancel
+    # when Xd' = Xq', and otherwise V comes from the previous network solution and converges with the corrector
     Iri = generator_current(inputs, results, generator, state, ts)
     bus_state = results.bus[generator_bus(generator)]
     V = bus_state.Vr[ts] + im * bus_state.Vi[ts]

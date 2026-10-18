@@ -1,5 +1,5 @@
 function time_values(inputs::Inputs)
-    return [ts * integration_step(inputs) for ts in 0:num_time_steps(inputs)]
+    return [time_at(inputs, ts) for ts in 1:num_time_steps(inputs)+1]
 end
 
 function is_time_series(state, field::Symbol)
@@ -30,7 +30,7 @@ function output_units(inputs::Inputs, field::Symbol)
         # the buses have no base voltage yet, so the voltages are only written in pu
         return [("pu", 1.0)]
     elseif field == :delta
-        return [("rad", 1.0)]
+        return [("rad", 1.0), ("deg", 180 / pi)]
     elseif field == :omega
         return [("pu", 1.0), ("Hz", fb(inputs))]
     elseif field == :Pmec || field == :Pele
@@ -81,12 +81,37 @@ function write_class_results(
     return nothing
 end
 
+# the bus states keep the voltages in rectangular form, so the magnitude and the angle are computed here.
+# The angle is in the interval from -pi to pi, as returned by angle
+function write_bus_polar_voltages(
+    output_path::String,
+    time::Vector{Float64},
+    bus_names::Vector{String},
+    states::Vector{BusState},
+)
+    magnitudes = Vector{Float64}[]
+    angles_rad = Vector{Float64}[]
+    angles_deg = Vector{Float64}[]
+    for state in states
+        V = state.Vr .+ im .* state.Vi
+        theta = angle.(V)
+        push!(magnitudes, abs.(V))
+        push!(angles_rad, theta)
+        push!(angles_deg, rad2deg.(theta))
+    end
+    write_csv(joinpath(output_path, "bus_V_abs_pu.csv"), time, bus_names, magnitudes)
+    write_csv(joinpath(output_path, "bus_theta_rad.csv"), time, bus_names, angles_rad)
+    write_csv(joinpath(output_path, "bus_theta_deg.csv"), time, bus_names, angles_deg)
+    return nothing
+end
+
 function write_results(inputs::Inputs, results::Results, output_path::String = joinpath(case_path(inputs), "results"))
     mkpath(output_path)
     time = time_values(inputs)
 
     bus_names = [bus_name(bus) for bus in inputs.buses]
     write_class_results(inputs, output_path, "bus", time, bus_names, results.bus)
+    write_bus_polar_voltages(output_path, time, bus_names, results.bus)
 
     generator_names = [generator_name(generator) for generator in inputs.generators]
     write_class_results(inputs, output_path, "generator", time, generator_names, results.generator)

@@ -64,11 +64,51 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
     return max_dif < tolerance(inputs)
 end
 
+function predict_voltages!(results::Results, ts::Int)
+    # the Norton current of the OneDOneQ generator is computed from the voltage at ts + 1,
+    # so the first network solution of the step starts from the voltages at ts
+    for state in results.bus
+        state.Vr[ts+1] = state.Vr[ts]
+        state.Vi[ts+1] = state.Vi[ts]
+    end
+    return nothing
+end
+
+function bus_voltages_at(results::Results, ts::Int)
+    V = zeros(ComplexF64, num_buses(results))
+    for (bus_idx, state) in enumerate(results.bus)
+        V[bus_idx] = state.Vr[ts] + im * state.Vi[ts]
+    end
+    return V
+end
+
+function apply_perturbations!(inputs::Inputs, results::Results, ts::Int)
+    # a perturbation at ts changes the voltages and electrical powers at that instant, so the network is
+    # solved again at ts and the step to ts + 1 starts from the values after the perturbation.
+    # The states are continuous and keep their values at ts
+    if !cache_Ybus!(inputs, ts)
+        return nothing
+    end
+    # the Norton current of the OneDOneQ generator depends on V when Xd' differs from Xq', so the network
+    # is solved until the voltages stop changing
+    for iteration in 1:max_iterations(inputs)
+        V_previous = bus_voltages_at(results, ts)
+        solve_network!(inputs, results, ts)
+        V = bus_voltages_at(results, ts)
+        if maximum(abs.(V .- V_previous)) < tolerance(inputs)
+            return nothing
+        end
+    end
+    error("The network did not converge after the perturbations at time step $ts.")
+end
+
+# advances the simulation from the time index ts to ts + 1
 function step!(inputs::Inputs, results::Results, ts::Int)
     caches = StepCache(inputs)
 
-    cache_Ybus!(inputs, ts) # update the Ybus cache and its LU factorization if there are any perturbations at this time step
+    apply_perturbations!(inputs, results, ts) # update Ybus and the network solution at ts if there are perturbations at this instant
 
+    predict_voltages!(results, ts)
     for (generator, state) in zip(inputs.generators, results.generator)
         predict_omega!(inputs, generator, state, ts)
         predict_delta!(inputs, state, ts)
@@ -77,7 +117,7 @@ function step!(inputs::Inputs, results::Results, ts::Int)
             predict_eq_prime!(inputs, generator, state, ts)
         end
     end
-    solve_network!(inputs, results, ts) # V[ts+1] and Pele[ts+1] from the predicted delta
+    solve_network!(inputs, results, ts + 1) # V[ts+1] and Pele[ts+1] from the predicted states
 
     for iteration in 1:max_iterations(inputs)
         cache_step!(inputs, results, ts, caches) # delta, omega, Vr and Vi at ts+1
@@ -90,7 +130,7 @@ function step!(inputs::Inputs, results::Results, ts::Int)
                 step_eq_prime!(inputs, generator, state, ts)
             end
         end
-        solve_network!(inputs, results, ts)
+        solve_network!(inputs, results, ts + 1)
 
         if step_converged(inputs, results, ts, caches)
             return nothing

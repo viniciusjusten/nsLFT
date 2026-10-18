@@ -82,6 +82,43 @@ mutable struct OneDOneQGenerator <: Generator
     tripped::Bool # indicates if the generator has been tripped
 end
 
+function OneDOneQGenerator(;
+    name::String,
+    bus::Int,
+    Sn::Float64,
+    Vn::Float64,
+    Xd::Float64,
+    Xd_prime::Float64,
+    Xq::Float64,
+    Xq_prime::Float64,
+    Ra::Float64,
+    Td0_prime::Float64,
+    Tq0_prime::Float64,
+    H::Float64,
+    D::Float64,
+    P0::Float64,
+    Q0::Float64,
+)
+    return OneDOneQGenerator(
+        name,
+        bus,
+        Sn,
+        Vn,
+        Xd,
+        Xd_prime,
+        Xq,
+        Xq_prime,
+        Ra,
+        Td0_prime,
+        Tq0_prime,
+        H,
+        D,
+        P0,
+        Q0,
+        false,
+    )
+end
+
 generator_name(generator::Generator) = generator.name
 
 generator_bus(generator::Generator) = generator.bus
@@ -123,12 +160,12 @@ function generator_admittance(inputs, generator::ClassicGenerator)
     return 1 / generator_impedance(inputs, generator)
 end
 
-function generator_impedance(inputs, generator::OneDOneQGenerator)
-    # The one q one d generator has a fictitious impedance to add to the Ybus matrix and to the generator's current injection
-    # In the end of the day, this impedance is added equally to Y * V and to I, so this is only a mathematical trick to make the system of equations solvable
-    return generator_Ra(inputs, generator) + im * (generator_Xd_prime(inputs, generator) + generator_Xq_prime(inputs, generator))
-end
-
 function generator_admittance(inputs, generator::OneDOneQGenerator)
-    return 1 / generator_impedance(inputs, generator)
+    # A single complex admittance only represents the stator equations when Xd' = Xq'. The admittance added to Ybus
+    # uses the mean of the two transient reactances, as in the Simulight models, and the same admittance times V is
+    # added to the Norton current, so the part of the stator equations it misses is carried by that current
+    Ra = generator_Ra(inputs, generator)
+    Xd_prime = generator_Xd_prime(inputs, generator)
+    Xq_prime = generator_Xq_prime(inputs, generator)
+    return (Ra - im * (Xd_prime + Xq_prime) / 2) / (Ra^2 + Xd_prime * Xq_prime)
 end
