@@ -2,6 +2,9 @@
 mutable struct StepCache
     delta::Vector{Float64}
     omega::Vector{Float64}
+    eq_prime::Vector{Float64}
+    ed_prime::Vector{Float64}
+    efd::Vector{Float64}
     Vr::Vector{Float64}
     Vi::Vector{Float64}
 end
@@ -9,13 +12,24 @@ end
 function StepCache(inputs::Inputs)
     n_generators = num_generators(inputs)
     n_buses = num_buses(inputs)
-    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
+    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
 end
 
 function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCache)
     for gen_idx in 1:num_generators(inputs)
         caches.delta[gen_idx] = results.generator[gen_idx].delta[ts+1]
         caches.omega[gen_idx] = results.generator[gen_idx].omega[ts+1]
+        if results.generator[gen_idx] isa ClassicGeneratorState
+            caches.eq_prime[gen_idx] = 0.0
+            caches.ed_prime[gen_idx] = 0.0
+            caches.efd[gen_idx] = 0.0
+        elseif results.generator[gen_idx] isa OneDOneQGeneratorState
+            caches.eq_prime[gen_idx] = results.generator[gen_idx].eq_prime[ts+1]
+            caches.ed_prime[gen_idx] = results.generator[gen_idx].ed_prime[ts+1]
+            caches.efd[gen_idx] = results.generator[gen_idx].efd[ts+1]
+        else
+            error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
+        end
     end
     for bus_idx in 1:num_buses(inputs)
         caches.Vr[bus_idx] = results.bus[bus_idx].Vr[ts+1]
@@ -32,6 +46,15 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
     for gen_idx in 1:num_generators(inputs)
         max_dif = max(max_dif, abs(caches.delta[gen_idx] - results.generator[gen_idx].delta[ts+1]))
         max_dif = max(max_dif, abs(caches.omega[gen_idx] - results.generator[gen_idx].omega[ts+1]))
+        if results.generator[gen_idx] isa ClassicGeneratorState
+            continue
+        elseif results.generator[gen_idx] isa OneDOneQGeneratorState
+            max_dif = max(max_dif, abs(caches.eq_prime[gen_idx] - results.generator[gen_idx].eq_prime[ts+1]))
+            max_dif = max(max_dif, abs(caches.ed_prime[gen_idx] - results.generator[gen_idx].ed_prime[ts+1]))
+            max_dif = max(max_dif, abs(caches.efd[gen_idx] - results.generator[gen_idx].efd[ts+1]))
+        else
+            error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
+        end
     end
     for bus_idx in 1:num_buses(inputs)
         max_dif = max(max_dif, abs(caches.Vr[bus_idx] - results.bus[bus_idx].Vr[ts+1]))
@@ -49,6 +72,10 @@ function step!(inputs::Inputs, results::Results, ts::Int)
     for (generator, state) in zip(inputs.generators, results.generator)
         predict_omega!(inputs, generator, state, ts)
         predict_delta!(inputs, state, ts)
+        if generator isa OneDOneQGenerator
+            predict_ed_prime!(inputs, generator, state, ts)
+            predict_eq_prime!(inputs, generator, state, ts)
+        end
     end
     solve_network!(inputs, results, ts) # V[ts+1] and Pele[ts+1] from the predicted delta
 
@@ -58,6 +85,10 @@ function step!(inputs::Inputs, results::Results, ts::Int)
         for (generator, state) in zip(inputs.generators, results.generator)
             step_omega!(inputs, generator, state, ts)
             step_delta!(inputs, state, ts)
+            if generator isa OneDOneQGenerator
+                step_ed_prime!(inputs, generator, state, ts)
+                step_eq_prime!(inputs, generator, state, ts)
+            end
         end
         solve_network!(inputs, results, ts)
 

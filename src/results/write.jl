@@ -35,6 +35,10 @@ function output_units(inputs::Inputs, field::Symbol)
         return [("pu", 1.0), ("Hz", fb(inputs))]
     elseif field == :Pmec || field == :Pele
         return [("pu", 1.0), ("MW", Sb(inputs))]
+    elseif field == :ed_prime || field == :eq_prime || field == :efd
+        return [("pu", 1.0)]
+    elseif field == :id || field == :iq
+        return [("pu", 1.0)]
     end
     error("No output unit is defined for the field $field.")
 end

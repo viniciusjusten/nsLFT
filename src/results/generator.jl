@@ -6,6 +6,8 @@ mutable struct ClassicGeneratorState <: GeneratorState
     Pmec::Vector{Float64} # mechanical power, in pu
     Pele::Vector{Float64} # electrical power, in pu
     Eq_prime::Float64 # internal EMF magnitude, in pu
+    id::Vector{Float64} # stator current along the d-axis, in pu
+    iq::Vector{Float64} # stator current along the q-axis, in pu
 end
 
 function ClassicGeneratorState(num_steps::Int)
@@ -17,9 +19,42 @@ function ClassicGeneratorState(num_steps::Int)
         fill(NaN, num_steps),
         fill(NaN, num_steps),
         NaN,
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
     )
 end
 
 function generator_state(::ClassicGenerator, num_steps::Int)
     return ClassicGeneratorState(num_steps)
+end
+
+mutable struct OneDOneQGeneratorState <: GeneratorState
+    delta::Vector{Float64} # rotor angle, in rad
+    omega::Vector{Float64} # rotor speed, in pu
+    Pmec::Vector{Float64} # mechanical power, in pu
+    Pele::Vector{Float64} # electrical power, in pu
+    ed_prime::Vector{Float64} # internal EMF along the d-axis, in pu
+    eq_prime::Vector{Float64} # internal EMF along the q-axis, in pu
+    id::Vector{Float64} # stator current along the d-axis, in pu
+    iq::Vector{Float64} # stator current along the q-axis, in pu
+    efd::Vector{Float64} # excitation voltage, in pu
+end
+
+function OneDOneQGeneratorState(num_steps::Int)
+    # NaN keeps a step not yet computed from passing a convergence check by accident
+    return OneDOneQGeneratorState(
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+        fill(NaN, num_steps),
+    )
+end
+
+function generator_state(::OneDOneQGenerator, num_steps::Int)
+    return OneDOneQGeneratorState(num_steps)
 end

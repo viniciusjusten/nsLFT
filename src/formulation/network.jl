@@ -39,7 +39,7 @@ function admittance_matrix(inputs::Inputs)
             bus_idx = generator_bus(generator)
             push!(rows, bus_idx)
             push!(cols, bus_idx)
-            push!(values, generator_admittance(inputs, generator)) # TODO change according to the generator model
+            push!(values, generator_admittance(inputs, generator))
         end
     end
 
@@ -74,14 +74,11 @@ function cache_Ybus!(inputs::Inputs, ts::Int)
 end
 
 function solve_network!(inputs::Inputs, results::Results, ts::Int)
-    # The current vector I only includes the E / Zg contributions from generators. Ig = (E - V) / Zg, and
-    # V / Zg is already included in the Ybus matrix. Il = - V / Zl,
-    # and the load contributions are already included in the Ybus matrix.
+    # The current vector I only includes generators that are in service, loads are included in the Ybus matrix
     I = zeros(ComplexF64, num_buses(inputs))
     for (generator, state) in zip(inputs.generators, results.generator)
         if !generator_tripped(generator)
-            E = state.Eq_prime * cis(state.delta[ts+1])
-            I[generator_bus(generator)] += E * generator_admittance(inputs, generator)
+            I[generator_bus(generator)] += generator_current_network_contribution(inputs, results, generator, state, ts+1)
         end
     end
     V = inputs.Ybus_lu \ I
@@ -93,6 +90,7 @@ function solve_network!(inputs::Inputs, results::Results, ts::Int)
 
     for (generator, state) in zip(inputs.generators, results.generator)
         state.Pele[ts+1] = electrical_power(inputs, results, generator, state, ts+1)
+        state.id[ts+1], state.iq[ts+1] = generator_current_dq(inputs, results, generator, state, ts+1)
     end
 
     return nothing

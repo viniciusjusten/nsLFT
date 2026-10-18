@@ -3,6 +3,7 @@ using nsLFT
 
 include(joinpath(@__DIR__, "..", "scripts", "read_csv.jl"))
 include(joinpath(@__DIR__, "..", "scripts", "ieee14.jl"))
+include(joinpath(@__DIR__, "trajectories.jl"))
 
 @testset "nsLFT" begin
     include(joinpath("ieee14_no_perturbation", "ieee14.jl"))
