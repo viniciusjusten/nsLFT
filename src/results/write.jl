@@ -116,5 +116,7 @@ function write_results(inputs::Inputs, results::Results, output_path::String = j
     generator_names = [generator_name(generator) for generator in inputs.generators]
     write_class_results(inputs, output_path, "generator", time, generator_names, results.generator)
 
+    write_dashboard(output_path)
+
     return nothing
 end

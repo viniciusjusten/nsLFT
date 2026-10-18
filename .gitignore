@@ -27,3 +27,4 @@ revise/Manifest.toml
 
 # Simulation outputs written by write_results
 **/results/*.csv
+**/results/dashboard.html

@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nsLFT · Resultados</title>
+<style>
+:root {
+  --navy: #122945;
+  --navy-light: #1a3a5f;
+  --teal: #26828c;
+  --teal-dark: #1e6a72;
+  --teal-subtle: #eff7f8;
+  --teal-mid: #b8dfe3;
+  --gold: #ab9671;
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --grid: #eef0f3;
+  --text: #1d1d1b;
+  --muted: #6b7280;
+  --muted-light: #9ca3af;
+  --font-display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Open Sans", "Segoe UI", system-ui, sans-serif;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 var(--font-body);
+}
+button { font: inherit; }
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--navy);
+  color: #fff;
+  flex-wrap: wrap;
+}
+.brand { font: 700 15px var(--font-display); letter-spacing: 0.02em; }
+.case-name { color: var(--teal-mid); font: 500 13px var(--font-display); }
+.spacer { flex: 1; }
+.segmented {
+  display: inline-flex;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.segmented button {
+  background: transparent;
+  color: #fff;
+  border: 0;
+  padding: 6px 12px;
+  font: 500 12px var(--font-display);
+  cursor: pointer;
+}
+.segmented button.active { background: var(--teal); }
+.top-btn {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: 500 12px var(--font-display);
+  cursor: pointer;
+}
+.top-btn:hover, .segmented button:hover { background: var(--navy-light); }
+.segmented button.active:hover { background: var(--teal-dark); }
+
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+}
+.side {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 4px 16px 24px;
+  overflow-y: auto;
+}
+.main {
+  padding: 20px;
+  overflow-y: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.side h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 600 11px var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 18px 0 8px;
+}
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0 0 0 8px;
+  color: var(--teal);
+  font: 500 11px var(--font-display);
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.link-btn:hover { text-decoration: underline; }
+.search {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+  margin-bottom: 4px;
+}
+.search:focus { outline: 2px solid var(--teal); outline-offset: -1px; }
+.group-title { font: 600 12px var(--font-display); color: var(--navy); margin: 12px 0 2px; }
+.var-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--grid);
+}
+.var-row:last-child { border-bottom: 0; }
+.var-symbol { font: 600 13px var(--font-display); color: var(--text); }
+.var-label { display: block; color: var(--muted); font-size: 11px; line-height: 1.3; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.var-row .chips { justify-content: flex-end; flex-shrink: 0; }
+.chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font: 500 12px var(--font-display);
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--teal); }
+.chip.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px 12px;
+}
+.card-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.card-tools { margin-left: auto; position: relative; align-self: center; }
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: 500 12px var(--font-display);
+  cursor: pointer;
+}
+.tool-btn:hover, .tool-btn.open { border-color: var(--teal); color: var(--teal-dark); }
+.tool-btn .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.elements-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 6;
+  width: 320px;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(18, 41, 69, 0.14);
+  padding: 4px 12px 12px;
+}
+.elements-menu .group-title { margin-top: 10px; margin-bottom: 6px; }
+.card-title { font: 600 14px var(--font-display); color: var(--navy); margin: 0; }
+.card-sub { color: var(--muted); font-size: 12px; }
+.chart { margin-top: 6px; }
+.chart svg { display: block; user-select: none; }
+.chart .grid { stroke: var(--grid); }
+.chart .axis { stroke: var(--muted-light); }
+.chart .tick { fill: var(--muted); font: 11px var(--font-body); font-variant-numeric: tabular-nums; }
+.chart .axis-title { fill: var(--muted); font: 600 11px var(--font-display); }
+.chart .crosshair { stroke: var(--navy); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .selection { fill: var(--teal); fill-opacity: 0.12; stroke: var(--teal); }
+.chart .overlay { cursor: crosshair; }
+.chart svg.dim path.series { opacity: 0.12; }
+.chart svg.dim path.series.hl { opacity: 1; stroke-width: 2.5; }
+.no-series { color: var(--muted); font-size: 13px; padding: 24px 0; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.legend-item.off { opacity: 0.35; }
+.legend-item svg { flex-shrink: 0; }
+
+.empty {
+  margin: 40px auto;
+  max-width: 520px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty h2 { font: 600 16px var(--font-display); color: var(--navy); }
+
+.tooltip {
+  position: fixed;
+  z-index: 10;
+  display: none;
+  pointer-events: none;
+  background: rgba(18, 41, 69, 0.96);
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  max-width: 360px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+.tooltip-time { font: 600 12px var(--font-display); margin-bottom: 4px; color: var(--teal-mid); }
+.tooltip-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tooltip-row .value { margin-left: auto; padding-left: 12px; font-variant-numeric: tabular-nums; }
+.swatch { display: inline-block; width: 10px; height: 3px; border-radius: 2px; }
+
+@media (max-width: 760px) {
+  body { height: auto; }
+  .layout { display: block; }
+  .side { border-right: 0; border-bottom: 1px solid var(--border); }
+  .main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="brand">nsLFT</span>
+  <span class="case-name" id="case-name"></span>
+  <span class="spacer"></span>
+  <button class="top-btn" id="reset-zoom" data-action="reset-zoom" hidden>Desfazer zoom</button>
+  <div class="segmented" role="group" aria-label="Modo de exibição">
+    <button data-action="set-mode" data-mode="separate">Separados</button>
+    <button data-action="set-mode" data-mode="combined">Combinados</button>
+  </div>
+  <button class="top-btn" data-action="open-folder">Abrir pasta…</button>
+  <input type="file" id="folder-input" webkitdirectory multiple hidden>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div id="cases-section"></div>
+    <section>
+      <h2>Variáveis <button class="link-btn" data-action="clear-variables">limpar</button></h2>
+      <input class="search" id="search" type="search" placeholder="Filtrar variáveis">
+      <div id="variables-list"></div>
+      <p class="hint" id="mode-hint"></p>
+    </section>
+  </aside>
+  <main class="main" id="charts"></main>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- nsLFT:CASE_DATA -->
+
+<script>
+"use strict";
+
+// Every loaded case keeps its CSV files parsed into datasets, keyed by the file name without extension.
+let store = { cases: [] };
+let state = defaultState();
+// The chart specs of the last render, indexed by the data-chart attribute of their elements.
+let charts = [];
+// The zoom selection being dragged, or null when there is none.
+let drag = null;
+let renderCounter = 0;
+let resizeScheduled = false;
+
+function defaultState() {
+  return {
+    selectedVariables: [],
+    selectedCases: [],
+    // The hidden elements of each chart, keyed by the chart id.
+    hiddenElements: {},
+    hiddenSeries: [],
+    mode: "separate",
+    xRange: null,
+    search: "",
+    // The id of the chart whose element menu is open, or null when every menu is closed.
+    openElementsMenu: null,
+  };
+}
+
+function storageKey() {
+  return "nsLFT-dashboard-v1";
+}
+
+function seriesColors() {
+  return [
+    "#26828c", "#d1495b", "#122945", "#e08e2b", "#4c9f38", "#7b4fa0", "#ab9671",
+    "#3a7cc4", "#8c564b", "#e377c2", "#17becf", "#7f7f7f", "#bcbd22", "#1d1d1b",
+  ];
+}
+
+function dashPatterns() {
+  return ["", "7 4", "2 3", "12 4 3 4", "4 4", "1 5"];
+}
+
+function chartHeight() {
+  return 320;
+}
+
+function chartMargins() {
+  return { left: 64, right: 18, top: 24, bottom: 34 };
+}
+
+function preferredVariables() {
+  return ["generator_Pele_MW", "generator_omega_Hz", "bus_V_abs_pu"];
+}
+
+function classOrder() {
+  return ["generator", "bus"];
+}
+
+function fieldOrder() {
+  return ["delta", "omega", "Pmec", "Pele", "efd", "eq_prime", "ed_prime", "id", "iq", "V_abs", "theta", "Vr", "Vi"];
+}
+
+function unitOrder() {
+  return ["pu", "MW", "Hz", "rad", "deg"];
+}
+
+function fieldInfo() {
+  return {
+    delta: { symbol: "δ", label: "Ângulo do rotor" },
+    omega: { symbol: "ω", label: "Velocidade do rotor" },
+    Pmec: { symbol: "Pmec", label: "Potência mecânica" },
+    Pele: { symbol: "Pele", label: "Potência elétrica" },
+    efd: { symbol: "Efd", label: "Tensão de campo" },
+    eq_prime: { symbol: "E′q", label: "Tensão transitória de eixo q" },
+    ed_prime: { symbol: "E′d", label: "Tensão transitória de eixo d" },
+    id: { symbol: "id", label: "Corrente de eixo d" },
+    iq: { symbol: "iq", label: "Corrente de eixo q" },
+    V_abs: { symbol: "|V|", label: "Módulo da tensão" },
+    theta: { symbol: "θ", label: "Ângulo da tensão" },
+    Vr: { symbol: "Vr", label: "Tensão, parte real" },
+    Vi: { symbol: "Vi", label: "Tensão, parte imaginária" },
+  };
+}
+
+function describeField(field) {
+  const info = fieldInfo();
+  if (field in info) {
+    return info[field];
+  }
+  return { symbol: field, label: "" };
+}
+
+function classLabel(cls) {
+  if (cls === "generator") {
+    return "Geradores";
+  }
+  if (cls === "bus") {
+    return "Barras";
+  }
+  return cls;
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function clamp(value, low, high) {
+  if (value < low) {
+    return low;
+  }
+  if (value > high) {
+    return high;
+  }
+  return value;
+}
+
+function rankOf(list, value) {
+  const index = list.indexOf(value);
+  if (index < 0) {
+    return list.length;
+  }
+  return index;
+}
+
+function toggleInList(list, value) {
+  const index = list.indexOf(value);
+  if (index >= 0) {
+    list.splice(index, 1);
+  } else {
+    list.push(value);
+  }
+}
+
+// ---------------------------------------------------------------- Data loading
+
+// The files are named <class>_<field>_<unit>.csv, and the field may itself contain underscores.
+function parseFileName(fileName) {
+  const base = fileName.replace(/\.csv$/i, "");
+  const first = base.indexOf("_");
+  const last = base.lastIndexOf("_");
+  if (first < 0 || last <= first) {
+    return null;
+  }
+  return {
+    key: base,
+    cls: base.slice(0, first),
+    field: base.slice(first + 1, last),
+    unit: base.slice(last + 1),
+  };
+}
+
+// The first column is the time in seconds and every other column is one element of the class.
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/);
+  const header = lines[0].split(",");
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() !== "") {
+      rows.push(lines[i]);
+    }
+  }
+
+  const time = new Float64Array(rows.length);
+  const columns = [];
+  for (let c = 1; c < header.length; c++) {
+    columns.push({ name: header[c].trim(), values: new Float64Array(rows.length) });
+  }
+  for (let r = 0; r < rows.length; r++) {
+    const cells = rows[r].split(",");
+    time[r] = parseFloat(cells[0]);
+    for (let c = 1; c < header.length; c++) {
+      columns[c - 1].values[r] = parseFloat(cells[c]);
+    }
+  }
+  return { time: time, columns: columns };
+}
+
+function findCase(caseName) {
+  for (const caseData of store.cases) {
+    if (caseData.name === caseName) {
+      return caseData;
+    }
+  }
+  return null;
+}
+
+function getOrCreateCase(caseName) {
+  let caseData = findCase(caseName);
+  if (caseData === null) {
+    caseData = { name: caseName, datasets: {} };
+    store.cases.push(caseData);
+  }
+  return caseData;
+}
+
+function addDataset(caseName, fileName, text) {
+  const info = parseFileName(fileName);
+  if (info === null) {
+    return;
+  }
+  const parsed = parseCsv(text);
+  const caseData = getOrCreateCase(caseName);
+  caseData.datasets[info.key] = {
+    key: info.key,
+    cls: info.cls,
+    field: info.field,
+    unit: info.unit,
+    time: parsed.time,
+    columns: parsed.columns,
+  };
+}
+
+function loadEmbeddedData() {
+  const blocks = document.querySelectorAll('script[type="text/csv"]');
+  for (const block of blocks) {
+    addDataset(block.dataset.case, block.dataset.file, block.textContent.trim());
+  }
+}
+
+// A folder picked in the browser gives paths such as <case>/results/<file>.csv, so the case is
+// named after the folder that holds the results folder, or after the folder itself otherwise.
+function caseNameFromPath(path) {
+  const parts = path.split("/");
+  parts.pop();
+  if (parts.length > 1 && parts[parts.length - 1] === "results") {
+    parts.pop();
+  }
+  if (parts.length === 0) {
+    return "caso";
+  }
+  return parts[parts.length - 1];
+}
+
+async function loadFolder(fileList) {
+  const loadedCases = [];
+  for (const file of fileList) {
+    if (!/\.csv$/i.test(file.name)) {
+      continue;
+    }
+    let path = file.webkitRelativePath;
+    if (path === "") {
+      path = file.name;
+    }
+    const caseName = caseNameFromPath(path);
+    if (!loadedCases.includes(caseName)) {
+      // A case loaded again replaces its old data, so a rerun can be reloaded without reopening the page.
+      const previous = findCase(caseName);
+      if (previous !== null) {
+        previous.datasets = {};
+      }
+      loadedCases.push(caseName);
+    }
+    const text = await file.text();
+    addDataset(caseName, file.name, text);
+  }
+
+  if (loadedCases.length === 0) {
+    window.alert("Nenhum arquivo .csv foi encontrado na pasta escolhida.");
+    return;
+  }
+  loadedCases.sort();
+  if (!state.selectedCases.includes(loadedCases[0])) {
+    state.selectedCases.push(loadedCases[0]);
+  }
+  ensureDefaults();
+  saveState();
+  renderAll();
+}
+
+// ---------------------------------------------------------------- State
+
+function saveState() {
+  const saved = {
+    selectedVariables: state.selectedVariables,
+    hiddenElements: state.hiddenElements,
+    hiddenSeries: state.hiddenSeries,
+    mode: state.mode,
+  };
+  try {
+    window.localStorage.setItem(storageKey(), JSON.stringify(saved));
+  } catch (error) {
+    // The page works without storage, it only forgets the selection on reload.
+  }
+}
+
+function restoreState() {
+  let saved = null;
+  try {
+    const text = window.localStorage.getItem(storageKey());
+    if (text !== null) {
+      saved = JSON.parse(text);
+    }
+  } catch (error) {
+    saved = null;
+  }
+  if (saved === null) {
+    return;
+  }
+  if (Array.isArray(saved.selectedVariables)) {
+    state.selectedVariables = saved.selectedVariables;
+  }
+  if (saved.hiddenElements !== null && typeof saved.hiddenElements === "object" && !Array.isArray(saved.hiddenElements)) {
+    state.hiddenElements = saved.hiddenElements;
+  }
+  if (Array.isArray(saved.hiddenSeries)) {
+    state.hiddenSeries = saved.hiddenSeries;
+  }
+  if (saved.mode === "separate" || saved.mode === "combined") {
+    state.mode = saved.mode;
+  }
+}
+
+// Drops selections that the loaded data does not have and picks a starting selection when nothing is left.
+function ensureDefaults() {
+  const catalog = variableCatalog();
+  const knownKeys = [];
+  for (const variable of catalog) {
+    knownKeys.push(variable.key);
+  }
+
+  const kept = [];
+  for (const key of state.selectedVariables) {
+    if (knownKeys.includes(key)) {
+      kept.push(key);
+    }
+  }
+  state.selectedVariables = kept;
+
+  if (state.selectedVariables.length === 0) {
+    for (const key of preferredVariables()) {
+      if (knownKeys.includes(key)) {
+        state.selectedVariables.push(key);
+      }
+    }
+  }
+  if (state.selectedVariables.length === 0 && knownKeys.length > 0) {
+    state.selectedVariables.push(knownKeys[0]);
+  }
+
+  const keptCases = [];
+  for (const caseName of state.selectedCases) {
+    if (findCase(caseName) !== null) {
+      keptCases.push(caseName);
+    }
+  }
+  state.selectedCases = keptCases;
+  if (state.selectedCases.length === 0 && store.cases.length > 0) {
+    state.selectedCases.push(store.cases[0].name);
+  }
+}
+
+// ---------------------------------------------------------------- Catalogs
+
+function compareVariables(a, b) {
+  const classDiff = rankOf(classOrder(), a.cls) - rankOf(classOrder(), b.cls);
+  if (classDiff !== 0) {
+    return classDiff;
+  }
+  if (a.cls !== b.cls) {
+    return a.cls.localeCompare(b.cls);
+  }
+  const fieldDiff = rankOf(fieldOrder(), a.field) - rankOf(fieldOrder(), b.field);
+  if (fieldDiff !== 0) {
+    return fieldDiff;
+  }
+  if (a.field !== b.field) {
+    return a.field.localeCompare(b.field);
+  }
+  const unitDiff = rankOf(unitOrder(), a.unit) - rankOf(unitOrder(), b.unit);
+  if (unitDiff !== 0) {
+    return unitDiff;
+  }
+  return a.unit.localeCompare(b.unit);
+}
+
+function variableCatalog() {
+  const seen = {};
+  const list = [];
+  for (const caseData of store.cases) {
+    for (const key of Object.keys(caseData.datasets)) {
+      if (key in seen) {
+        continue;
+      }
+      const dataset = caseData.datasets[key];
+      const variable = { key: key, cls: dataset.cls, field: dataset.field, unit: dataset.unit };
+      seen[key] = variable;
+      list.push(variable);
+    }
+  }
+  list.sort(compareVariables);
+  return list;
+}
+
+function findVariable(key) {
+  for (const variable of variableCatalog()) {
+    if (variable.key === key) {
+      return variable;
+    }
+  }
+  return null;
+}
+
+// Groups the variables by class and then by field, so each field gets one row with a chip per unit.
+function groupVariables(catalog) {
+  const groups = [];
+  for (const variable of catalog) {
+    let group = groups[groups.length - 1];
+    if (group === undefined || group.cls !== variable.cls) {
+      group = { cls: variable.cls, fields: [] };
+      groups.push(group);
+    }
+    let fieldRow = group.fields[group.fields.length - 1];
+    if (fieldRow === undefined || fieldRow.field !== variable.field) {
+      fieldRow = { field: variable.field, variables: [] };
+      group.fields.push(fieldRow);
+    }
+    fieldRow.variables.push(variable);
+  }
+  return groups;
+}
+
+function matchesSearch(cls, field) {
+  const search = state.search.trim().toLowerCase();
+  if (search === "") {
+    return true;
+  }
+  const info = describeField(field);
+  const text = [cls, classLabel(cls), field, info.symbol, info.label].join(" ").toLowerCase();
+  return text.includes(search);
+}
+
+// Lists the elements of each class that appear in the variables and cases of one chart.
+function chartElementGroups(spec) {
+  const groups = [];
+  for (const entry of spec.entries) {
+    const dataset = entry.dataset;
+    let group = null;
+    for (const candidate of groups) {
+      if (candidate.cls === dataset.cls) {
+        group = candidate;
+      }
+    }
+    if (group === null) {
+      group = { cls: dataset.cls, names: [] };
+      groups.push(group);
+    }
+    for (const column of dataset.columns) {
+      if (!group.names.includes(column.name)) {
+        group.names.push(column.name);
+      }
+    }
+  }
+  return groups;
+}
+
+function elementId(cls, name) {
+  return cls + "|" + name;
+}
+
+function hiddenElementsOf(chartId) {
+  const hidden = state.hiddenElements[chartId];
+  if (hidden === undefined) {
+    return [];
+  }
+  return hidden;
+}
+
+function editableHiddenElements(chartId) {
+  if (state.hiddenElements[chartId] === undefined) {
+    state.hiddenElements[chartId] = [];
+  }
+  return state.hiddenElements[chartId];
+}
+
+// ---------------------------------------------------------------- Sidebar and header
+
+function renderHeader() {
+  let caseText = "";
+  if (store.cases.length === 1) {
+    caseText = store.cases[0].name;
+  } else if (store.cases.length > 1) {
+    caseText = store.cases.length + " casos carregados";
+  }
+  document.getElementById("case-name").textContent = caseText;
+  if (store.cases.length === 1) {
+    document.title = "nsLFT · " + caseText;
+  }
+
+  const modeButtons = document.querySelectorAll('[data-action="set-mode"]');
+  for (const button of modeButtons) {
+    button.classList.toggle("active", button.dataset.mode === state.mode);
+  }
+  document.getElementById("reset-zoom").hidden = state.xRange === null;
+
+  let hint = "Cada variável selecionada ganha o seu próprio gráfico.";
+  if (state.mode === "combined") {
+    hint = "Variáveis com a mesma unidade dividem o mesmo gráfico, por exemplo Pele e Pmec em MW.";
+  }
+  document.getElementById("mode-hint").textContent = hint;
+}
+
+function renderCases() {
+  const section = document.getElementById("cases-section");
+  if (store.cases.length < 2) {
+    section.innerHTML = "";
+    return;
+  }
+  let html = '<h2>Casos</h2><div class="chips">';
+  for (const caseData of store.cases) {
+    let on = "";
+    if (state.selectedCases.includes(caseData.name)) {
+      on = " on";
+    }
+    const name = escapeHtml(caseData.name);
+    html += `<button class="chip${on}" data-action="toggle-case" data-case="${name}">${name}</button>`;
+  }
+  html += "</div>";
+  section.innerHTML = html;
+}
+
+function renderVariables() {
+  const catalog = variableCatalog();
+  const groups = groupVariables(catalog);
+  let html = "";
+  for (const group of groups) {
+    let rows = "";
+    for (const fieldRow of group.fields) {
+      if (!matchesSearch(group.cls, fieldRow.field)) {
+        continue;
+      }
+      const info = describeField(fieldRow.field);
+      let chips = "";
+      for (const variable of fieldRow.variables) {
+        let on = "";
+        if (state.selectedVariables.includes(variable.key)) {
+          on = " on";
+        }
+        const key = escapeHtml(variable.key);
+        chips += `<button class="chip${on}" data-action="toggle-variable" data-key="${key}" title="${key}.csv">${escapeHtml(variable.unit)}</button>`;
+      }
+      rows += `<div class="var-row"><div><span class="var-symbol">${escapeHtml(info.symbol)}</span>`;
+      if (info.label !== "") {
+        rows += `<span class="var-label">${escapeHtml(info.label)}</span>`;
+      }
+      rows += `</div><div class="chips">${chips}</div></div>`;
+    }
+    if (rows !== "") {
+      html += `<div class="group-title">${escapeHtml(classLabel(group.cls))}</div>${rows}`;
+    }
+  }
+  if (html === "" && catalog.length > 0) {
+    html = '<p class="hint">Nenhuma variável corresponde ao filtro.</p>';
+  }
+  document.getElementById("variables-list").innerHTML = html;
+}
+
+// The element selector of a chart is a button in the corner of its card that opens a menu of chips.
+function elementsMenuHtml(spec) {
+  const chartId = escapeHtml(spec.id);
+  const hidden = hiddenElementsOf(spec.id);
+  const groups = chartElementGroups(spec);
+
+  let total = 0;
+  let shown = 0;
+  let menu = "";
+  for (const group of groups) {
+    const cls = escapeHtml(group.cls);
+    menu += `<div class="group-title">${escapeHtml(classLabel(group.cls))}`;
+    menu += `<button class="link-btn" data-action="elements-all" data-chart="${chartId}" data-cls="${cls}">todos</button>`;
+    menu += `<button class="link-btn" data-action="elements-none" data-chart="${chartId}" data-cls="${cls}">nenhum</button></div>`;
+    menu += '<div class="chips">';
+    for (const name of group.names) {
+      const id = elementId(group.cls, name);
+      total += 1;
+      let on = " on";
+      if (hidden.includes(id)) {
+        on = "";
+      } else {
+        shown += 1;
+      }
+      menu += `<button class="chip${on}" data-action="toggle-element" data-chart="${chartId}" data-element="${escapeHtml(id)}">${escapeHtml(name)}</button>`;
+    }
+    menu += "</div>";
+  }
+
+  const isOpen = state.openElementsMenu === spec.id;
+  let openClass = "";
+  let hiddenAttribute = " hidden";
+  if (isOpen) {
+    openClass = " open";
+    hiddenAttribute = "";
+  }
+  return (
+    `<div class="card-tools">` +
+    `<button class="tool-btn${openClass}" data-action="toggle-elements-menu" data-chart="${chartId}" aria-expanded="${isOpen}">` +
+    `Elementos <span class="count">${shown}/${total}</span></button>` +
+    `<div class="elements-menu" data-chart="${chartId}"${hiddenAttribute}>${menu}</div></div>`
+  );
+}
+
+function closeElementsMenu() {
+  if (state.openElementsMenu === null) {
+    return;
+  }
+  state.openElementsMenu = null;
+  const menus = document.querySelectorAll(".elements-menu");
+  for (const menu of menus) {
+    menu.hidden = true;
+  }
+  const buttons = document.querySelectorAll(".tool-btn.open");
+  for (const button of buttons) {
+    button.classList.remove("open");
+    button.setAttribute("aria-expanded", "false");
+  }
+}
+
+function renderAll() {
+  renderHeader();
+  renderCases();
+  renderVariables();
+  renderCharts();
+}
+
+// ---------------------------------------------------------------- Chart specs
+
+// In the separate mode each variable gets a chart, and in the combined mode each unit does.
+// A chart always shows its variables for every selected case, so cases can be compared.
+function buildChartSpecs() {
+  const specs = [];
+  for (const key of state.selectedVariables) {
+    const variable = findVariable(key);
+    if (variable === null) {
+      continue;
+    }
+    let groupId = "variable:" + key;
+    if (state.mode === "combined") {
+      groupId = "unit:" + variable.unit;
+    }
+
+    let spec = null;
+    for (const candidate of specs) {
+      if (candidate.id === groupId) {
+        spec = candidate;
+      }
+    }
+    if (spec === null) {
+      spec = { id: groupId, unit: variable.unit, variables: [], entries: [], series: [] };
+      specs.push(spec);
+    }
+    spec.variables.push(variable);
+
+    for (const caseName of state.selectedCases) {
+      const caseData = findCase(caseName);
+      const dataset = caseData.datasets[key];
+      if (dataset !== undefined) {
+        spec.entries.push({ caseName: caseName, dataset: dataset });
+      }
+    }
+  }
+
+  for (const spec of specs) {
+    describeChart(spec);
+    buildSeries(spec);
+  }
+  return specs;
+}
+
+function describeChart(spec) {
+  const symbols = [];
+  const classes = [];
+  for (const variable of spec.variables) {
+    const info = describeField(variable.field);
+    symbols.push(info.symbol);
+    const label = classLabel(variable.cls);
+    if (!classes.includes(label)) {
+      classes.push(label);
+    }
+  }
+  if (spec.variables.length === 1) {
+    const info = describeField(spec.variables[0].field);
+    spec.title = info.symbol;
+    if (info.label !== "") {
+      spec.title = info.symbol + " · " + info.label;
+    }
+  } else {
+    spec.title = symbols.join(" e ");
+  }
+  spec.subtitle = classes.join(", ") + " · " + spec.unit;
+}
+
+// Elements are told apart by color and the variable or case by the dash pattern. When the chart has
+// a single element, the colors go to the variables and cases instead.
+function buildSeries(spec) {
+  const hidden = hiddenElementsOf(spec.id);
+  const combos = [];
+  const elements = [];
+  const caseNames = [];
+  for (const entry of spec.entries) {
+    const comboId = entry.caseName + "|" + entry.dataset.key;
+    if (!combos.includes(comboId)) {
+      combos.push(comboId);
+    }
+    if (!caseNames.includes(entry.caseName)) {
+      caseNames.push(entry.caseName);
+    }
+    for (const column of entry.dataset.columns) {
+      const id = elementId(entry.dataset.cls, column.name);
+      if (!hidden.includes(id) && !elements.includes(id)) {
+        elements.push(id);
+      }
+    }
+  }
+
+  const colors = seriesColors();
+  const dashes = dashPatterns();
+  for (const entry of spec.entries) {
+    const comboIndex = combos.indexOf(entry.caseName + "|" + entry.dataset.key);
+    const info = describeField(entry.dataset.field);
+    for (const column of entry.dataset.columns) {
+      const id = elementId(entry.dataset.cls, column.name);
+      if (hidden.includes(id)) {
+        continue;
+      }
+      const labelParts = [column.name];
+      if (spec.variables.length > 1) {
+        labelParts.push(info.symbol);
+      }
+      if (caseNames.length > 1) {
+        labelParts.push(entry.caseName);
+      }
+
+      let color = colors[comboIndex % colors.length];
+      let dash = "";
+      if (elements.length > 1) {
+        const elementIndex = elements.indexOf(id);
+        color = colors[elementIndex % colors.length];
+        dash = dashes[comboIndex % dashes.length];
+      }
+
+      spec.series.push({
+        id: entry.caseName + "|" + entry.dataset.key + "|" + column.name,
+        label: labelParts.join(" · "),
+        color: color,
+        dash: dash,
+        time: entry.dataset.time,
+        values: column.values,
+      });
+    }
+  }
+}
+
+function isSeriesVisible(series) {
+  return !state.hiddenSeries.includes(series.id);
+}
+
+// ---------------------------------------------------------------- Scales and ticks
+
+// Index of the first time that is not smaller than the value.
+function lowerBound(values, value) {
+  let low = 0;
+  let high = values.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (values[middle] < value) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
+function nearestIndex(values, value) {
+  const index = lowerBound(values, value);
+  if (index >= values.length) {
+    return values.length - 1;
+  }
+  if (index === 0) {
+    return 0;
+  }
+  if (value - values[index - 1] < values[index] - value) {
+    return index - 1;
+  }
+  return index;
+}
+
+// Rounds the step to 1, 2 or 5 times a power of ten, so the tick labels stay short.
+function niceStep(span, count) {
+  const raw = span / count;
+  const exponent = Math.floor(Math.log10(raw));
+  const magnitude = Math.pow(10, exponent);
+  const normalized = raw / magnitude;
+  let step = 10;
+  if (normalized < 1.5) {
+    step = 1;
+  } else if (normalized < 3) {
+    step = 2;
+  } else if (normalized < 7) {
+    step = 5;
+  }
+  return step * magnitude;
+}
+
+function tickValues(min, max, count) {
+  const step = niceStep(max - min, count);
+  const ticks = [];
+  const first = Math.ceil(min / step) * step;
+  for (let value = first; value <= max + step * 1e-9; value += step) {
+    // Removes the floating point noise that the repeated sum leaves, such as 0.30000000000000004.
+    let rounded = Math.round(value / step) * step;
+    if (Math.abs(rounded) < step * 1e-9) {
+      // Writes zero instead of the negative zero that the rounding can return.
+      rounded = 0;
+    }
+    ticks.push(rounded);
+  }
+  return { values: ticks, step: step };
+}
+
+function decimalsForStep(step) {
+  if (step >= 1) {
+    return 0;
+  }
+  const decimals = Math.ceil(-Math.log10(step) - 1e-9);
+  return clamp(decimals, 0, 10);
+}
+
+function formatTick(value, step) {
+  const decimals = decimalsForStep(step);
+  return value.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function formatValue(value) {
+  if (Number.isNaN(value)) {
+    return "–";
+  }
+  const size = Math.abs(value);
+  if (size !== 0 && (size < 1e-4 || size >= 1e7)) {
+    return value.toExponential(4).replace(".", ",");
+  }
+  return value.toLocaleString("pt-BR", { maximumSignificantDigits: 7 });
+}
+
+function toPixelX(geom, t) {
+  return geom.left + ((t - geom.x0) / (geom.x1 - geom.x0)) * geom.plotWidth;
+}
+
+function toPixelY(geom, value) {
+  return geom.top + (1 - (value - geom.y0) / (geom.y1 - geom.y0)) * geom.plotHeight;
+}
+
+function timeDomain(spec) {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const series of spec.series) {
+    const count = series.time.length;
+    if (count === 0) {
+      continue;
+    }
+    min = Math.min(min, series.time[0]);
+    max = Math.max(max, series.time[count - 1]);
+  }
+  if (state.xRange !== null) {
+    min = Math.max(min, state.xRange[0]);
+    max = Math.min(max, state.xRange[1]);
+  }
+  if (!(max > min)) {
+    max = min + 1;
+  }
+  return [min, max];
+}
+
+// The y range covers only the part of each visible series that falls inside the time range.
+function valueDomain(spec, x0, x1) {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const series of spec.series) {
+    if (!isSeriesVisible(series)) {
+      continue;
+    }
+    const start = lowerBound(series.time, x0);
+    const stop = lowerBound(series.time, x1 + 1e-12);
+    for (let i = start; i < stop; i++) {
+      const value = series.values[i];
+      if (Number.isNaN(value)) {
+        continue;
+      }
+      if (value < min) {
+        min = value;
+      }
+      if (value > max) {
+        max = value;
+      }
+    }
+  }
+  if (min === Infinity) {
+    return [0, 1];
+  }
+  let span = max - min;
+  const scale = Math.max(Math.abs(min), Math.abs(max));
+  if (span <= 1e-9 * Math.max(scale, 1e-12)) {
+    // A flat series gets a band of one percent around its value, so its line does not touch the frame.
+    span = Math.max(scale * 0.02, 1e-6);
+    return [min - span / 2, max + span / 2];
+  }
+  return [min - span * 0.05, max + span * 0.05];
+}
+
+// Long series are reduced to the lowest and highest value of each pixel column,
+// which draws the same picture with far fewer points.
+function seriesPath(series, geom) {
+  const count = series.time.length;
+  let start = lowerBound(series.time, geom.x0) - 1;
+  start = clamp(start, 0, count - 1);
+  let stop = lowerBound(series.time, geom.x1) + 1;
+  stop = clamp(stop, 0, count);
+
+  const indices = [];
+  const visibleCount = stop - start;
+  if (visibleCount <= geom.plotWidth * 2) {
+    for (let i = start; i < stop; i++) {
+      indices.push(i);
+    }
+  } else {
+    const bucketSize = Math.ceil(visibleCount / geom.plotWidth);
+    for (let bucketStart = start; bucketStart < stop; bucketStart += bucketSize) {
+      const bucketStop = Math.min(bucketStart + bucketSize, stop);
+      let lowIndex = bucketStart;
+      let highIndex = bucketStart;
+      for (let i = bucketStart; i < bucketStop; i++) {
+        if (series.values[i] < series.values[lowIndex]) {
+          lowIndex = i;
+        }
+        if (series.values[i] > series.values[highIndex]) {
+          highIndex = i;
+        }
+      }
+      indices.push(Math.min(lowIndex, highIndex));
+      if (lowIndex !== highIndex) {
+        indices.push(Math.max(lowIndex, highIndex));
+      }
+    }
+  }
+
+  let path = "";
+  let penDown = false;
+  for (const i of indices) {
+    const value = series.values[i];
+    if (Number.isNaN(value)) {
+      penDown = false;
+      continue;
+    }
+    const x = toPixelX(geom, series.time[i]);
+    const y = toPixelY(geom, value);
+    let command = "L";
+    if (!penDown) {
+      command = "M";
+    }
+    path += command + x.toFixed(1) + " " + y.toFixed(1);
+    penDown = true;
+  }
+  return path;
+}
+
+// ---------------------------------------------------------------- Chart rendering
+
+function renderCharts() {
+  const container = document.getElementById("charts");
+  hideHover();
+  charts = [];
+  renderCounter += 1;
+
+  if (store.cases.length === 0) {
+    container.innerHTML =
+      '<div class="empty"><h2>Nenhum resultado carregado</h2>' +
+      "<p>Esta página é gerada pelo nsLFT junto com os CSVs de cada caso. Para ver outra pasta de resultados, " +
+      "use <strong>Abrir pasta…</strong> e escolha a pasta <code>results</code> de um caso, ou a pasta que contém vários casos.</p></div>";
+    return;
+  }
+
+  const specs = buildChartSpecs();
+  if (specs.length === 0) {
+    container.innerHTML =
+      '<div class="empty"><h2>Nenhuma variável selecionada</h2><p>Escolha uma ou mais variáveis na lateral.</p></div>';
+    return;
+  }
+
+  // Emptying the container makes the browser scroll back to the top, so the scroll position is kept
+  // and restored after the charts are drawn again. The window scrolls instead on narrow screens.
+  const containerScroll = container.scrollTop;
+  const windowScroll = window.scrollY;
+
+  container.innerHTML = "";
+  for (let index = 0; index < specs.length; index++) {
+    const spec = specs[index];
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML =
+      `<header class="card-head"><h3 class="card-title">${escapeHtml(spec.title)}</h3>` +
+      `<span class="card-sub">${escapeHtml(spec.subtitle)}</span>${elementsMenuHtml(spec)}</header>` +
+      `<div class="chart"></div><div class="legend"></div>`;
+    container.appendChild(card);
+
+    const chartElement = card.querySelector(".chart");
+    const legendElement = card.querySelector(".legend");
+    drawChart(spec, index, chartElement);
+    renderLegend(spec, legendElement);
+    charts.push(spec);
+  }
+
+  container.scrollTop = containerScroll;
+  window.scrollTo(window.scrollX, windowScroll);
+}
+
+function drawChart(spec, index, element) {
+  let visibleCount = 0;
+  for (const series of spec.series) {
+    if (isSeriesVisible(series)) {
+      visibleCount += 1;
+    }
+  }
+  if (spec.series.length === 0) {
+    element.innerHTML = '<div class="no-series">Nenhum elemento selecionado para esta variável.</div>';
+    spec.geom = null;
+    return;
+  }
+
+  const margins = chartMargins();
+  const width = Math.max(element.clientWidth, 320);
+  const height = chartHeight();
+  const xDomain = timeDomain(spec);
+  const yDomain = valueDomain(spec, xDomain[0], xDomain[1]);
+  const geom = {
+    left: margins.left,
+    top: margins.top,
+    plotWidth: width - margins.left - margins.right,
+    plotHeight: height - margins.top - margins.bottom,
+    x0: xDomain[0],
+    x1: xDomain[1],
+    y0: yDomain[0],
+    y1: yDomain[1],
+  };
+  spec.geom = geom;
+
+  const clipId = "clip-" + renderCounter + "-" + index;
+  const right = geom.left + geom.plotWidth;
+  const bottom = geom.top + geom.plotHeight;
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
+  svg += `<defs><clipPath id="${clipId}"><rect x="${geom.left}" y="${geom.top}" width="${geom.plotWidth}" height="${geom.plotHeight}"/></clipPath></defs>`;
+
+  const yTicks = tickValues(geom.y0, geom.y1, 5);
+  for (const value of yTicks.values) {
+    const y = toPixelY(geom, value).toFixed(1);
+    svg += `<line class="grid" x1="${geom.left}" x2="${right}" y1="${y}" y2="${y}"/>`;
+    svg += `<text class="tick" x="${geom.left - 8}" y="${y}" text-anchor="end" dominant-baseline="middle">${formatTick(value, yTicks.step)}</text>`;
+  }
+
+  const xTickCount = Math.max(2, Math.round(geom.plotWidth / 90));
+  const xTicks = tickValues(geom.x0, geom.x1, xTickCount);
+  for (const value of xTicks.values) {
+    const x = toPixelX(geom, value).toFixed(1);
+    svg += `<line class="grid" x1="${x}" x2="${x}" y1="${geom.top}" y2="${bottom}"/>`;
+    svg += `<text class="tick" x="${x}" y="${bottom + 16}" text-anchor="middle">${formatTick(value, xTicks.step)}</text>`;
+  }
+
+  svg += `<line class="axis" x1="${geom.left}" x2="${right}" y1="${bottom}" y2="${bottom}"/>`;
+  svg += `<text class="axis-title" x="${geom.left - 8}" y="${geom.top - 10}" text-anchor="end">${escapeHtml(spec.unit)}</text>`;
+  svg += `<text class="axis-title" x="${right}" y="${bottom + 30}" text-anchor="end">tempo [s]</text>`;
+
+  svg += `<g clip-path="url(#${clipId})">`;
+  for (let k = 0; k < spec.series.length; k++) {
+    const series = spec.series[k];
+    if (!isSeriesVisible(series)) {
+      continue;
+    }
+    const path = seriesPath(series, geom);
+    let dash = "";
+    if (series.dash !== "") {
+      dash = ` stroke-dasharray="${series.dash}"`;
+    }
+    svg += `<path class="series" data-index="${k}" d="${path}" fill="none" stroke="${series.color}" stroke-width="1.75" stroke-linejoin="round"${dash}/>`;
+  }
+  svg += "</g>";
+
+  if (visibleCount === 0) {
+    svg += `<text class="axis-title" x="${geom.left + geom.plotWidth / 2}" y="${geom.top + geom.plotHeight / 2}" text-anchor="middle">Todas as séries estão ocultas</text>`;
+  }
+
+  svg += `<line class="crosshair" x1="0" x2="0" y1="${geom.top}" y2="${bottom}" visibility="hidden"/>`;
+  svg += `<rect class="selection" x="0" y="${geom.top}" width="0" height="${geom.plotHeight}" visibility="hidden"/>`;
+  svg += `<rect class="overlay" data-chart="${index}" x="${geom.left}" y="${geom.top}" width="${geom.plotWidth}" height="${geom.plotHeight}" fill="transparent"/>`;
+  svg += "</svg>";
+
+  element.innerHTML = svg;
+  spec.svg = element.querySelector("svg");
+}
+
+function renderLegend(spec, element) {
+  let html = "";
+  for (let k = 0; k < spec.series.length; k++) {
+    const series = spec.series[k];
+    let off = "";
+    if (!isSeriesVisible(series)) {
+      off = " off";
+    }
+    let dash = "";
+    if (series.dash !== "") {
+      dash = ` stroke-dasharray="${series.dash}"`;
+    }
+    html +=
+      `<span class="legend-item${off}" data-action="toggle-series" data-series="${escapeHtml(series.id)}" data-index="${k}" title="Clique para mostrar ou ocultar">` +
+      `<svg width="24" height="10"><line x1="1" y1="5" x2="23" y2="5" stroke="${series.color}" stroke-width="2.5"${dash}/></svg>` +
+      `${escapeHtml(series.label)}</span>`;
+  }
+  element.innerHTML = html;
+}
+
+// ---------------------------------------------------------------- Hover, zoom and highlight
+
+function timeAtPointer(spec, overlay, clientX) {
+  const rect = overlay.getBoundingClientRect();
+  let fraction = (clientX - rect.left) / rect.width;
+  fraction = clamp(fraction, 0, 1);
+  return spec.geom.x0 + fraction * (spec.geom.x1 - spec.geom.x0);
+}
+
+// The crosshair is drawn on every chart at the same time, so the charts can be read together.
+function updateCrosshairs(t) {
+  for (const spec of charts) {
+    if (!spec.geom) {
+      continue;
+    }
+    const line = spec.svg.querySelector(".crosshair");
+    if (t < spec.geom.x0 || t > spec.geom.x1) {
+      line.setAttribute("visibility", "hidden");
+      continue;
+    }
+    const x = toPixelX(spec.geom, t).toFixed(1);
+    line.setAttribute("x1", x);
+    line.setAttribute("x2", x);
+    line.setAttribute("visibility", "visible");
+  }
+}
+
+function compareRowsByValue(a, b) {
+  return b.value - a.value;
+}
+
+function showTooltip(spec, t, clientX, clientY) {
+  const rows = [];
+  let shownTime = t;
+  for (const series of spec.series) {
+    if (!isSeriesVisible(series)) {
+      continue;
+    }
+    const index = nearestIndex(series.time, t);
+    shownTime = series.time[index];
+    rows.push({ label: series.label, color: series.color, value: series.values[index] });
+  }
+  if (rows.length === 0) {
+    return;
+  }
+  rows.sort(compareRowsByValue);
+
+  const timeText = shownTime.toLocaleString("pt-BR", { maximumFractionDigits: 6 });
+  let html = `<div class="tooltip-time">t = ${timeText} s</div>`;
+  const maxRows = 24;
+  for (let i = 0; i < rows.length && i < maxRows; i++) {
+    const row = rows[i];
+    html +=
+      `<div class="tooltip-row"><span class="swatch" style="background:${row.color}"></span>` +
+      `<span>${escapeHtml(row.label)}</span><span class="value">${formatValue(row.value)} ${escapeHtml(spec.unit)}</span></div>`;
+  }
+  if (rows.length > maxRows) {
+    html += `<div class="tooltip-row">… mais ${rows.length - maxRows} séries</div>`;
+  }
+
+  const tooltip = document.getElementById("tooltip");
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  const box = tooltip.getBoundingClientRect();
+  let left = clientX + 16;
+  if (left + box.width > window.innerWidth - 8) {
+    left = clientX - 16 - box.width;
+  }
+  let top = clientY + 12;
+  if (top + box.height > window.innerHeight - 8) {
+    top = window.innerHeight - 8 - box.height;
+  }
+  tooltip.style.left = Math.max(8, left) + "px";
+  tooltip.style.top = Math.max(8, top) + "px";
+}
+
+function hideHover() {
+  document.getElementById("tooltip").style.display = "none";
+  for (const spec of charts) {
+    if (spec.geom) {
+      spec.svg.querySelector(".crosshair").setAttribute("visibility", "hidden");
+    }
+  }
+}
+
+function updateSelection(spec, t) {
+  const rect = spec.svg.querySelector(".selection");
+  const start = toPixelX(spec.geom, drag.start);
+  const current = toPixelX(spec.geom, t);
+  rect.setAttribute("x", Math.min(start, current).toFixed(1));
+  rect.setAttribute("width", Math.abs(current - start).toFixed(1));
+  rect.setAttribute("visibility", "visible");
+}
+
+function onChartsMouseMove(event) {
+  const overlay = event.target.closest(".overlay");
+  if (overlay === null) {
+    hideHover();
+    return;
+  }
+  const index = Number(overlay.dataset.chart);
+  const spec = charts[index];
+  const t = timeAtPointer(spec, overlay, event.clientX);
+  if (drag !== null && drag.chart === index) {
+    drag.current = t;
+    updateSelection(spec, t);
+  }
+  updateCrosshairs(t);
+  showTooltip(spec, t, event.clientX, event.clientY);
+}
+
+function onChartsMouseDown(event) {
+  const overlay = event.target.closest(".overlay");
+  if (overlay === null || event.button !== 0) {
+    return;
+  }
+  event.preventDefault();
+  const index = Number(overlay.dataset.chart);
+  const t = timeAtPointer(charts[index], overlay, event.clientX);
+  drag = { chart: index, start: t, current: t };
+}
+
+// A drag wider than a few pixels zooms every chart into the selected time interval.
+function onWindowMouseUp() {
+  if (drag === null) {
+    return;
+  }
+  const spec = charts[drag.chart];
+  const finished = drag;
+  drag = null;
+  if (!spec || !spec.geom) {
+    return;
+  }
+  const startPixel = toPixelX(spec.geom, finished.start);
+  const endPixel = toPixelX(spec.geom, finished.current);
+  if (Math.abs(endPixel - startPixel) < 6) {
+    spec.svg.querySelector(".selection").setAttribute("visibility", "hidden");
+    return;
+  }
+  state.xRange = [Math.min(finished.start, finished.current), Math.max(finished.start, finished.current)];
+  renderHeader();
+  renderCharts();
+}
+
+function onChartsDoubleClick(event) {
+  const overlay = event.target.closest(".overlay");
+  if (overlay === null || state.xRange === null) {
+    return;
+  }
+  state.xRange = null;
+  renderHeader();
+  renderCharts();
+}
+
+function clearHighlights() {
+  const dimmed = document.querySelectorAll(".chart svg.dim");
+  for (const svg of dimmed) {
+    svg.classList.remove("dim");
+    const highlighted = svg.querySelectorAll(".hl");
+    for (const path of highlighted) {
+      path.classList.remove("hl");
+    }
+  }
+}
+
+// Hovering a legend entry fades the other lines of the same chart.
+function onChartsMouseOver(event) {
+  clearHighlights();
+  const item = event.target.closest(".legend-item");
+  if (item === null || item.classList.contains("off")) {
+    return;
+  }
+  const card = item.closest(".card");
+  const svg = card.querySelector(".chart svg");
+  if (svg === null) {
+    return;
+  }
+  const path = svg.querySelector(`path.series[data-index="${item.dataset.index}"]`);
+  if (path === null) {
+    return;
+  }
+  svg.classList.add("dim");
+  path.classList.add("hl");
+}
+
+function onChartsMouseLeave() {
+  hideHover();
+  clearHighlights();
+}
+
+// ---------------------------------------------------------------- Actions
+
+function handleAction(element) {
+  const action = element.dataset.action;
+  if (action === "toggle-variable") {
+    toggleInList(state.selectedVariables, element.dataset.key);
+  } else if (action === "clear-variables") {
+    state.selectedVariables = [];
+  } else if (action === "toggle-case") {
+    toggleInList(state.selectedCases, element.dataset.case);
+  } else if (action === "toggle-elements-menu") {
+    toggleElementsMenu(element.dataset.chart);
+    return;
+  } else if (action === "toggle-element") {
+    const hidden = editableHiddenElements(element.dataset.chart);
+    toggleInList(hidden, element.dataset.element);
+  } else if (action === "elements-all") {
+    showAllElements(element.dataset.chart, element.dataset.cls);
+  } else if (action === "elements-none") {
+    hideAllElements(element.dataset.chart, element.dataset.cls);
+  } else if (action === "toggle-series") {
+    toggleInList(state.hiddenSeries, element.dataset.series);
+  } else if (action === "set-mode") {
+    state.mode = element.dataset.mode;
+  } else if (action === "reset-zoom") {
+    state.xRange = null;
+  } else if (action === "open-folder") {
+    document.getElementById("folder-input").click();
+    return;
+  } else {
+    return;
+  }
+  saveState();
+  renderAll();
+}
+
+// Opening a menu only shows it, because the menus are already in the page with the charts.
+function toggleElementsMenu(chartId) {
+  const wasOpen = state.openElementsMenu === chartId;
+  closeElementsMenu();
+  if (wasOpen) {
+    return;
+  }
+  state.openElementsMenu = chartId;
+  const menus = document.querySelectorAll(".elements-menu");
+  for (const menu of menus) {
+    if (menu.dataset.chart === chartId) {
+      menu.hidden = false;
+    }
+  }
+  const buttons = document.querySelectorAll(".tool-btn");
+  for (const button of buttons) {
+    if (button.dataset.chart === chartId) {
+      button.classList.add("open");
+      button.setAttribute("aria-expanded", "true");
+    }
+  }
+}
+
+function showAllElements(chartId, cls) {
+  const prefix = cls + "|";
+  const kept = [];
+  for (const id of hiddenElementsOf(chartId)) {
+    if (!id.startsWith(prefix)) {
+      kept.push(id);
+    }
+  }
+  state.hiddenElements[chartId] = kept;
+}
+
+function hideAllElements(chartId, cls) {
+  const spec = findChart(chartId);
+  if (spec === null) {
+    return;
+  }
+  const hidden = editableHiddenElements(chartId);
+  for (const group of chartElementGroups(spec)) {
+    if (group.cls !== cls) {
+      continue;
+    }
+    for (const name of group.names) {
+      const id = elementId(cls, name);
+      if (!hidden.includes(id)) {
+        hidden.push(id);
+      }
+    }
+  }
+}
+
+function findChart(chartId) {
+  for (const spec of charts) {
+    if (spec.id === chartId) {
+      return spec;
+    }
+  }
+  return null;
+}
+
+// A click outside the open menu closes it, while the clicks inside it keep it open.
+function onDocumentClick(event) {
+  const element = event.target.closest("[data-action]");
+  const insideTools = event.target.closest(".card-tools");
+  if (insideTools === null) {
+    closeElementsMenu();
+  }
+  if (element === null) {
+    return;
+  }
+  handleAction(element);
+}
+
+function onDocumentKeyDown(event) {
+  if (event.key === "Escape") {
+    closeElementsMenu();
+  }
+}
+
+function onSearchInput(event) {
+  state.search = event.target.value;
+  renderVariables();
+}
+
+function onFolderChosen(event) {
+  const files = event.target.files;
+  loadFolder(files);
+  // Clearing the input lets the same folder be chosen again after a new run.
+  event.target.value = "";
+}
+
+function onResizeFrame() {
+  resizeScheduled = false;
+  renderCharts();
+}
+
+function onWindowResize() {
+  if (resizeScheduled) {
+    return;
+  }
+  resizeScheduled = true;
+  window.requestAnimationFrame(onResizeFrame);
+}
+
+function init() {
+  loadEmbeddedData();
+  restoreState();
+  ensureDefaults();
+
+  document.addEventListener("click", onDocumentClick);
+  document.addEventListener("keydown", onDocumentKeyDown);
+  document.getElementById("search").addEventListener("input", onSearchInput);
+  document.getElementById("folder-input").addEventListener("change", onFolderChosen);
+
+  const container = document.getElementById("charts");
+  container.addEventListener("mousemove", onChartsMouseMove);
+  container.addEventListener("mousedown", onChartsMouseDown);
+  container.addEventListener("dblclick", onChartsDoubleClick);
+  container.addEventListener("mouseover", onChartsMouseOver);
+  container.addEventListener("mouseleave", onChartsMouseLeave);
+  window.addEventListener("mouseup", onWindowMouseUp);
+  window.addEventListener("resize", onWindowResize);
+
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
