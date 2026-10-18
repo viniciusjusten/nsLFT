@@ -14,12 +14,20 @@ function case_name(output_path::String)
     return basename(case_path)
 end
 
-# the CSV files are embedded as text in the page, so it opens offline with a double click and needs no server
+# the CSV files and the case description are embedded as text in the page, so it opens offline with a
+# double click and needs no server. The single line diagram is drawn only when case.json exists
 function write_dashboard(output_path::String)
     name = case_name(output_path)
     case_attribute = escape_html_attribute(name)
 
     io = IOBuffer()
+    description_path = joinpath(output_path, "case.json")
+    if isfile(description_path)
+        description = read(description_path, String)
+        println(io, "<script type=\"application/json\" data-case=\"$case_attribute\" data-file=\"case.json\">")
+        print(io, description)
+        println(io, "</script>")
+    end
     for file_name in readdir(output_path)
         if !endswith(file_name, ".csv")
             continue

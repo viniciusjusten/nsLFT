@@ -176,18 +176,18 @@ function ieee14_inputs(
     )
 end
 
-# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
-# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "classic")
-# results = nsLFT.solve(inputs)
+perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "classic")
+results = nsLFT.solve(inputs)
 
-# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
-# inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-trip-ug2", perturbations = perturbations, generator_model = "classic")
-# results = nsLFT.solve(inputs)
+perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+inputs = ieee14_inputs("data/ieee14", "results/ieee14_classic-trip-ug2", perturbations = perturbations, generator_model = "classic")
+results = nsLFT.solve(inputs)
 
-# perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
-# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q")
-# results = nsLFT.solve(inputs)
+perturbations = [nsLFT.ShortCircuit("curto-b14", 14, 1.0, 99999, 0), nsLFT.ShortCircuitRemoval("rm-curto-b14", 1, 1.2), nsLFT.CircuitTrip("trip-linha-b14-13", 17, 1.2)]
+inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-curto-b14-trip-linha-b14-13", perturbations = perturbations, generator_model = "one_d_one_q")
+results = nsLFT.solve(inputs)
 
-# perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
-# inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q")
-# results = nsLFT.solve(inputs)
+perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
+inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q")
+results = nsLFT.solve(inputs)

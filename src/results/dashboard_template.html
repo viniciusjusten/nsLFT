@@ -26,6 +26,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
 body {
   display: flex;
@@ -75,6 +76,151 @@ button { font: inherit; }
 }
 .top-btn:hover, .segmented button:hover { background: var(--navy-light); }
 .segmented button.active:hover { background: var(--teal-dark); }
+.tabs { display: inline-flex; gap: 4px; margin-left: 8px; }
+.tabs button {
+  background: transparent;
+  border: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font: 600 13px var(--font-display);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tabs button:hover { color: #fff; background: var(--navy-light); }
+.tabs button.active { color: #fff; background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 -2px 0 var(--teal-mid); }
+.chart-controls { display: inline-flex; gap: 16px; align-items: center; }
+
+.diagram-page {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.diagram-main {
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.facts { display: flex; flex-wrap: wrap; gap: 12px; }
+.fact {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  min-width: 150px;
+}
+.fact-label {
+  font: 600 11px var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.fact-value {
+  font: 600 15px var(--font-display);
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.diagram { margin-top: 8px; }
+.diagram svg { display: block; touch-action: none; user-select: none; }
+.dg-el { cursor: pointer; }
+.dg-bus { cursor: grab; }
+.dg-hit { stroke: transparent; fill: none; }
+.dg-ink { stroke: var(--navy); fill: none; }
+.dg-fill { fill: var(--navy); }
+.dg-bar { stroke-width: 5; stroke-linecap: round; }
+.dg-wire { stroke: #64748b; stroke-width: 1.6; }
+.dg-device { fill: var(--surface); stroke-width: 1.6; }
+.dg-el:hover .dg-ink, .dg-el.selected .dg-ink { stroke: var(--teal); }
+.dg-el:hover .dg-fill, .dg-el.selected .dg-fill { fill: var(--teal); }
+.dg-el:hover .dg-wire, .dg-el.selected .dg-wire { stroke-width: 3; }
+.dg-el.selected .dg-bar { stroke-width: 7; }
+.dg-label { font: 600 11px var(--font-display); fill: var(--navy); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+.dg-sublabel { font: 10px var(--font-body); fill: var(--muted); font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+.dg-event-mark { fill: #d1495b; }
+.dg-event-cross { stroke: #d1495b; stroke-width: 2.5; stroke-linecap: round; }
+.dg-event-back { fill: var(--surface); }
+.diagram-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.diagram-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+.events-list { margin-top: 6px; }
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--grid);
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+}
+.event-row:last-child { border-bottom: 0; }
+.event-row:hover .event-target { color: var(--teal-dark); text-decoration: underline; }
+.time-badge {
+  font: 600 11px var(--font-display);
+  background: #fdecee;
+  color: #b42335;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.event-type { font: 600 13px var(--font-display); color: var(--navy); }
+.event-name { color: var(--muted); font-size: 12px; }
+.event-target { margin-left: auto; font-size: 12px; color: var(--teal); white-space: nowrap; }
+
+.details {
+  width: 380px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  overflow-y: auto;
+  padding: 16px 18px 28px;
+}
+.details-head { display: flex; align-items: flex-start; gap: 8px; }
+.details-kind { font: 600 11px var(--font-display); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.details-head h3 { font: 700 18px var(--font-display); color: var(--navy); margin: 2px 0 0; }
+.icon-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+.icon-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+.badge {
+  display: inline-block;
+  background: var(--teal-subtle);
+  color: var(--teal-dark);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font: 600 11px var(--font-display);
+}
+.model-text { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+.details h4 {
+  font: 600 11px var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 20px 0 4px;
+}
+.details .section-note { color: var(--muted); font-size: 11.5px; margin: 0 0 4px; }
+.q-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.q-table td { padding: 5px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
+.q-symbol { font: 600 12.5px var(--font-display); color: var(--text); }
+.q-label { display: block; color: var(--muted); font-size: 11px; line-height: 1.3; }
+.q-value { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px; }
+.q-alt { display: block; color: var(--muted); font-size: 11px; }
 
 .layout {
   flex: 1;
@@ -236,10 +382,17 @@ button { font: inherit; }
 .tooltip-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .tooltip-row .value { margin-left: auto; padding-left: 12px; font-variant-numeric: tabular-nums; }
 .swatch { display: inline-block; width: 10px; height: 3px; border-radius: 2px; }
+.tooltip-hint { color: var(--teal-mid); font-size: 11px; margin-top: 4px; }
+
+@media (max-width: 900px) {
+  .diagram-page { display: block; }
+  .details { width: auto; border-left: 0; border-top: 1px solid var(--border); }
+}
 
 @media (max-width: 760px) {
   body { height: auto; }
   .layout { display: block; }
+  .diagram-main { padding: 16px; }
   .side { border-right: 0; border-bottom: 1px solid var(--border); }
   .main { padding: 16px; }
 }
@@ -249,17 +402,52 @@ button { font: inherit; }
 <header class="top">
   <span class="brand">nsLFT</span>
   <span class="case-name" id="case-name"></span>
+  <nav class="tabs" aria-label="Páginas">
+    <button data-action="set-tab" data-tab="diagram">Diagrama</button>
+    <button data-action="set-tab" data-tab="charts">Gráficos</button>
+  </nav>
   <span class="spacer"></span>
-  <button class="top-btn" id="reset-zoom" data-action="reset-zoom" hidden>Desfazer zoom</button>
-  <div class="segmented" role="group" aria-label="Modo de exibição">
-    <button data-action="set-mode" data-mode="separate">Separados</button>
-    <button data-action="set-mode" data-mode="combined">Combinados</button>
-  </div>
+  <span class="chart-controls" id="chart-controls">
+    <button class="top-btn" id="reset-zoom" data-action="reset-zoom" hidden>Desfazer zoom</button>
+    <span class="segmented" role="group" aria-label="Modo de exibição">
+      <button data-action="set-mode" data-mode="separate">Separados</button>
+      <button data-action="set-mode" data-mode="combined">Combinados</button>
+    </span>
+  </span>
   <button class="top-btn" data-action="open-folder">Abrir pasta…</button>
   <input type="file" id="folder-input" webkitdirectory multiple hidden>
 </header>
 
-<div class="layout">
+<div class="diagram-page" id="diagram-page" hidden>
+  <div class="diagram-main">
+    <div id="diagram-case-picker"></div>
+    <div class="facts" id="case-facts"></div>
+    <article class="card">
+      <header class="card-head">
+        <h3 class="card-title">Diagrama unifilar</h3>
+        <span class="card-sub">Clique em um elemento para ver o ponto inicial e o modelo. Arraste as barras para reorganizar.</span>
+        <div class="card-tools"><button class="tool-btn" data-action="reset-layout">Reorganizar</button></div>
+      </header>
+      <div class="diagram" id="diagram"></div>
+      <div class="diagram-legend">
+        <span><svg width="26" height="12"><line x1="2" y1="6" x2="24" y2="6" stroke="#122945" stroke-width="5" stroke-linecap="round"/></svg>Barra</span>
+        <span><svg width="26" height="12"><line x1="1" y1="6" x2="25" y2="6" stroke="#64748b" stroke-width="1.6"/></svg>Linha</span>
+        <span><svg width="26" height="16"><line x1="1" y1="8" x2="25" y2="8" stroke="#64748b" stroke-width="1.6"/><circle cx="10" cy="8" r="6" fill="#fff" stroke="#122945" stroke-width="1.6"/><circle cx="16" cy="8" r="6" fill="#fff" stroke="#122945" stroke-width="1.6"/></svg>Transformador</span>
+        <span><svg width="20" height="20"><circle cx="10" cy="10" r="8" fill="#fff" stroke="#122945" stroke-width="1.6"/><path d="M5 10 Q7.5 5 10 10 T15 10" fill="none" stroke="#122945" stroke-width="1.6"/></svg>Gerador</span>
+        <span><svg width="12" height="20"><line x1="6" y1="1" x2="6" y2="13" stroke="#122945" stroke-width="1.6"/><polygon points="1,12 11,12 6,19" fill="#122945"/></svg>Carga</span>
+        <span><svg width="18" height="20"><line x1="9" y1="1" x2="9" y2="7" stroke="#122945" stroke-width="1.6"/><line x1="3" y1="7" x2="15" y2="7" stroke="#122945" stroke-width="1.6"/><line x1="3" y1="11" x2="15" y2="11" stroke="#122945" stroke-width="1.6"/><line x1="9" y1="11" x2="9" y2="16" stroke="#122945" stroke-width="1.6"/><line x1="5" y1="16" x2="13" y2="16" stroke="#122945" stroke-width="1.6"/><line x1="7" y1="19" x2="11" y2="19" stroke="#122945" stroke-width="1.6"/></svg>Shunt</span>
+        <span><svg width="14" height="20"><path d="M9 1 L3 11 L7 11 L5 19 L12 8 L8 8 Z" fill="#d1495b"/></svg>Evento</span>
+      </div>
+    </article>
+    <article class="card">
+      <header class="card-head"><h3 class="card-title">Eventos</h3><span class="card-sub">Perturbações aplicadas na simulação</span></header>
+      <div class="events-list" id="events-list"></div>
+    </article>
+  </div>
+  <aside class="details" id="details" hidden></aside>
+</div>
+
+<div class="layout" id="charts-page" hidden>
   <aside class="side">
     <div id="cases-section"></div>
     <section>
@@ -288,6 +476,12 @@ let charts = [];
 let drag = null;
 let renderCounter = 0;
 let resizeScheduled = false;
+// The geometry of the last diagram drawn, used to turn pointer positions back into bus positions.
+let diagramView = null;
+// The bus positions of each network, keyed by the names of its buses, in the unit square.
+let layoutCache = {};
+// The diagram element under a pressed pointer, which becomes a bus drag when the pointer moves.
+let pointerTarget = null;
 
 function defaultState() {
   return {
@@ -301,7 +495,24 @@ function defaultState() {
     search: "",
     // The id of the chart whose element menu is open, or null when every menu is closed.
     openElementsMenu: null,
+    // The page shown, "diagram" or "charts", kept in the address so a reload stays on it.
+    tab: "diagram",
+    // The case drawn in the diagram and the element whose details are open, as { kind, index }.
+    diagramCase: null,
+    selectedElement: null,
   };
+}
+
+function layoutStoragePrefix() {
+  return "nsLFT-layout-v1:";
+}
+
+function diagramPadding() {
+  return { left: 60, right: 120, top: 70, bottom: 70 };
+}
+
+function eventColor() {
+  return "#d1495b";
 }
 
 function storageKey() {
@@ -470,10 +681,22 @@ function findCase(caseName) {
 function getOrCreateCase(caseName) {
   let caseData = findCase(caseName);
   if (caseData === null) {
-    caseData = { name: caseName, datasets: {} };
+    caseData = { name: caseName, datasets: {}, description: null };
     store.cases.push(caseData);
   }
   return caseData;
+}
+
+// The case description written by the model holds the network, the initial point and the model parameters.
+function addDescription(caseName, text) {
+  let description = null;
+  try {
+    description = JSON.parse(text);
+  } catch (error) {
+    return;
+  }
+  const caseData = getOrCreateCase(caseName);
+  caseData.description = description;
 }
 
 function addDataset(caseName, fileName, text) {
@@ -498,6 +721,10 @@ function loadEmbeddedData() {
   for (const block of blocks) {
     addDataset(block.dataset.case, block.dataset.file, block.textContent.trim());
   }
+  const descriptions = document.querySelectorAll('script[type="application/json"][data-file="case.json"]');
+  for (const block of descriptions) {
+    addDescription(block.dataset.case, block.textContent);
+  }
 }
 
 // A folder picked in the browser gives paths such as <case>/results/<file>.csv, so the case is
@@ -517,7 +744,9 @@ function caseNameFromPath(path) {
 async function loadFolder(fileList) {
   const loadedCases = [];
   for (const file of fileList) {
-    if (!/\.csv$/i.test(file.name)) {
+    const isCsv = /\.csv$/i.test(file.name);
+    const isDescription = file.name === "case.json";
+    if (!isCsv && !isDescription) {
       continue;
     }
     let path = file.webkitRelativePath;
@@ -530,11 +759,16 @@ async function loadFolder(fileList) {
       const previous = findCase(caseName);
       if (previous !== null) {
         previous.datasets = {};
+        previous.description = null;
       }
       loadedCases.push(caseName);
     }
     const text = await file.text();
-    addDataset(caseName, file.name, text);
+    if (isDescription) {
+      addDescription(caseName, text);
+    } else {
+      addDataset(caseName, file.name, text);
+    }
   }
 
   if (loadedCases.length === 0) {
@@ -769,10 +1003,15 @@ function renderHeader() {
     document.title = "nsLFT · " + caseText;
   }
 
+  const tabButtons = document.querySelectorAll('[data-action="set-tab"]');
+  for (const button of tabButtons) {
+    button.classList.toggle("active", button.dataset.tab === state.tab);
+  }
   const modeButtons = document.querySelectorAll('[data-action="set-mode"]');
   for (const button of modeButtons) {
     button.classList.toggle("active", button.dataset.mode === state.mode);
   }
+  document.getElementById("chart-controls").hidden = state.tab !== "charts";
   document.getElementById("reset-zoom").hidden = state.xRange === null;
 
   let hint = "Cada variável selecionada ganha o seu próprio gráfico.";
@@ -897,11 +1136,20 @@ function closeElementsMenu() {
   }
 }
 
+// Only the visible page is drawn, because the charts and the diagram take their size from their container.
 function renderAll() {
   renderHeader();
-  renderCases();
-  renderVariables();
-  renderCharts();
+  const onCharts = state.tab === "charts";
+  document.getElementById("charts-page").hidden = !onCharts;
+  document.getElementById("diagram-page").hidden = onCharts;
+  if (onCharts) {
+    renderCases();
+    renderVariables();
+    renderCharts();
+  } else {
+    hideHover();
+    renderDiagramPage();
+  }
 }
 
 // ---------------------------------------------------------------- Chart specs
@@ -1458,6 +1706,11 @@ function showTooltip(spec, t, clientX, clientY) {
     html += `<div class="tooltip-row">… mais ${rows.length - maxRows} séries</div>`;
   }
 
+  placeTooltip(html, clientX, clientY);
+}
+
+// Shows the tooltip next to the pointer, on the side that keeps it inside the window.
+function placeTooltip(html, clientX, clientY) {
   const tooltip = document.getElementById("tooltip");
   tooltip.innerHTML = html;
   tooltip.style.display = "block";
@@ -1588,6 +1841,1135 @@ function onChartsMouseLeave() {
   clearHighlights();
 }
 
+// ---------------------------------------------------------------- Case description
+
+function quantityInfo() {
+  return {
+    system: {
+      Sb: { symbol: "Sb", label: "Potência base" },
+      fb: { symbol: "fb", label: "Frequência base" },
+      integration_step: { symbol: "Δt", label: "Passo de integração" },
+      simulation_horizon: { symbol: "T", label: "Horizonte de simulação" },
+      tolerance: { symbol: "tol", label: "Tolerância de convergência" },
+      max_iterations: { symbol: "itmax", label: "Iterações máximas por passo" },
+    },
+    bus: {
+      V: { symbol: "|V|", label: "Módulo da tensão" },
+      theta: { symbol: "θ", label: "Ângulo da tensão" },
+      V_pf: { symbol: "|V| fluxo", label: "Módulo da tensão no fluxo de potência" },
+      theta_pf: { symbol: "θ fluxo", label: "Ângulo da tensão no fluxo de potência" },
+      B_shunt: { symbol: "B shunt", label: "Susceptância shunt da barra, em Mvar a 1 pu" },
+    },
+    circuit: {
+      P_from: { symbol: "P de", label: "Potência ativa que sai da barra de origem" },
+      Q_from: { symbol: "Q de", label: "Potência reativa que sai da barra de origem" },
+      P_to: { symbol: "P para", label: "Potência ativa que sai da barra de destino" },
+      Q_to: { symbol: "Q para", label: "Potência reativa que sai da barra de destino" },
+      P_loss: { symbol: "Perda P", label: "Perda ativa no circuito" },
+      Q_loss: { symbol: "Perda Q", label: "Potência reativa consumida no circuito" },
+      I_from: { symbol: "|I|", label: "Corrente na barra de origem" },
+      R: { symbol: "R", label: "Resistência série" },
+      X: { symbol: "X", label: "Reatância série" },
+      G: { symbol: "G", label: "Condutância shunt total" },
+      B: { symbol: "B", label: "Susceptância shunt total, metade em cada extremidade" },
+      tap_ratio: { symbol: "tap", label: "Relação de tap do modelo, igual a 1/a" },
+    },
+    generator: {
+      P_terminal: { symbol: "P", label: "Potência ativa nos terminais" },
+      Q_terminal: { symbol: "Q", label: "Potência reativa nos terminais" },
+      P0: { symbol: "P0", label: "Potência ativa do fluxo de potência" },
+      Q0: { symbol: "Q0", label: "Potência reativa do fluxo de potência" },
+      delta: { symbol: "δ", label: "Ângulo do rotor" },
+      omega: { symbol: "ω", label: "Velocidade do rotor" },
+      Pmec: { symbol: "Pmec", label: "Potência mecânica" },
+      Pele: { symbol: "Pele", label: "Potência elétrica" },
+      Eq_prime: { symbol: "E′", label: "Tensão interna atrás de X′d, constante" },
+      ed_prime: { symbol: "E′d", label: "Tensão transitória de eixo d" },
+      eq_prime: { symbol: "E′q", label: "Tensão transitória de eixo q" },
+      id: { symbol: "id", label: "Corrente de eixo d" },
+      iq: { symbol: "iq", label: "Corrente de eixo q" },
+      efd: { symbol: "Efd", label: "Tensão de campo" },
+      Sn: { symbol: "Sn", label: "Potência nominal" },
+      Vn: { symbol: "Vn", label: "Tensão nominal" },
+      Xd: { symbol: "Xd", label: "Reatância síncrona de eixo d" },
+      Xd_prime: { symbol: "X′d", label: "Reatância transitória de eixo d" },
+      Xq: { symbol: "Xq", label: "Reatância síncrona de eixo q" },
+      Xq_prime: { symbol: "X′q", label: "Reatância transitória de eixo q" },
+      Ra: { symbol: "Ra", label: "Resistência de armadura" },
+      Td0_prime: { symbol: "T′d0", label: "Constante de tempo transitória de eixo d em circuito aberto" },
+      Tq0_prime: { symbol: "T′q0", label: "Constante de tempo transitória de eixo q em circuito aberto" },
+      H: { symbol: "H", label: "Constante de inércia" },
+      D: { symbol: "D", label: "Coeficiente de amortecimento" },
+    },
+    load: {
+      P: { symbol: "P", label: "Potência ativa na tensão de t = 0" },
+      Q: { symbol: "Q", label: "Potência reativa na tensão de t = 0" },
+      P0: { symbol: "P0", label: "Potência ativa na tensão do fluxo de potência" },
+      Q0: { symbol: "Q0", label: "Potência reativa na tensão do fluxo de potência" },
+      G: { symbol: "G", label: "Condutância equivalente" },
+      B: { symbol: "B", label: "Susceptância equivalente" },
+    },
+    event: {
+      fault_conductance: { symbol: "Gf", label: "Condutância de falta" },
+      fault_susceptance: { symbol: "Bf", label: "Susceptância de falta" },
+      new_p0: { symbol: "P0 novo", label: "Nova potência ativa" },
+      new_q0: { symbol: "Q0 novo", label: "Nova potência reativa" },
+    },
+  };
+}
+
+function describeQuantity(kind, key) {
+  const info = quantityInfo();
+  const group = info[kind];
+  if (group !== undefined && key in group) {
+    return group[key];
+  }
+  return { symbol: key, label: "" };
+}
+
+function modelInfo() {
+  return {
+    ClassicGenerator: {
+      name: "Clássico",
+      description: "Tensão interna constante atrás da reatância transitória X′d. Só a equação de oscilação é dinâmica, com os estados δ e ω.",
+    },
+    OneDOneQGenerator: {
+      name: "1d1q",
+      description: "Modelo de dois eixos, com as tensões transitórias E′d e E′q dinâmicas, a tensão de campo Efd constante e a equação de oscilação.",
+    },
+    ConstantZLoad: {
+      name: "Impedância constante",
+      description: "Admitância fixa calculada com P0 e Q0 na tensão do fluxo de potência, de modo que a potência varia com |V|².",
+    },
+    line: {
+      name: "Linha",
+      description: "Modelo π com impedância série R + jX e a susceptância shunt B dividida entre as duas extremidades.",
+    },
+    transformer: {
+      name: "Transformador",
+      description: "Impedância série com tap fora do nominal do lado da barra de origem.",
+    },
+  };
+}
+
+function describeModel(model) {
+  const info = modelInfo();
+  if (model in info) {
+    return info[model];
+  }
+  return { name: model, description: "" };
+}
+
+function eventTypeLabel(type) {
+  const labels = {
+    ShortCircuit: "Curto-circuito",
+    ShortCircuitRemoval: "Eliminação do curto-circuito",
+    CircuitTrip: "Desligamento de circuito",
+    GeneratorTrip: "Desligamento de gerador",
+    LoadChange: "Variação de carga",
+  };
+  if (type in labels) {
+    return labels[type];
+  }
+  return type;
+}
+
+function kindLabel(kind, element) {
+  if (kind === "bus") {
+    return "Barra";
+  }
+  if (kind === "circuit") {
+    if (element.type === "transformer") {
+      return "Transformador";
+    }
+    return "Linha";
+  }
+  if (kind === "generator") {
+    return "Gerador";
+  }
+  if (kind === "load") {
+    return "Carga";
+  }
+  return kind;
+}
+
+function collectionOf(description, kind) {
+  if (kind === "bus") {
+    return description.buses;
+  }
+  if (kind === "circuit") {
+    return description.circuits;
+  }
+  if (kind === "generator") {
+    return description.generators;
+  }
+  if (kind === "load") {
+    return description.loads;
+  }
+  return [];
+}
+
+function elementOf(description, kind, index) {
+  const list = collectionOf(description, kind);
+  if (index < 0 || index >= list.length) {
+    return null;
+  }
+  return list[index];
+}
+
+function findQuantity(quantities, key) {
+  for (const quantity of quantities) {
+    if (quantity.key === key) {
+      return quantity;
+    }
+  }
+  return null;
+}
+
+function quantityValue(quantities, key, unit) {
+  const quantity = findQuantity(quantities, key);
+  if (quantity === null) {
+    return NaN;
+  }
+  for (const entry of quantity.values) {
+    if (entry.unit === unit && entry.value !== null) {
+      return entry.value;
+    }
+  }
+  return NaN;
+}
+
+function formatEntry(entry) {
+  if (entry.value === null) {
+    return "–";
+  }
+  const text = formatValue(entry.value);
+  if (entry.unit === "deg") {
+    return text + "°";
+  }
+  if (entry.unit === "") {
+    return text;
+  }
+  return text + " " + entry.unit;
+}
+
+function formatFixed(value, decimals) {
+  if (Number.isNaN(value)) {
+    return "–";
+  }
+  // A value that rounds to zero is written without the sign that a tiny negative number would keep.
+  const smallest = 0.5 * Math.pow(10, -decimals);
+  if (Math.abs(value) < smallest) {
+    value = 0;
+  }
+  return value.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+// The targets of a perturbation are indices that start at 1, and a short circuit removal points to the
+// short circuit it clears, so the target of that short circuit is used instead.
+function eventTarget(description, eventIndex) {
+  let event = description.perturbations[eventIndex];
+  for (let depth = 0; depth < 3 && event !== undefined; depth++) {
+    const targets = event.targets;
+    for (const kind of ["bus", "circuit", "generator", "load"]) {
+      if (kind in targets) {
+        return { kind: kind, index: targets[kind] - 1 };
+      }
+    }
+    if (!("short_circuit" in targets)) {
+      return null;
+    }
+    event = description.perturbations[targets.short_circuit - 1];
+  }
+  return null;
+}
+
+function elementTitle(description, target) {
+  if (target === null) {
+    return "";
+  }
+  const element = elementOf(description, target.kind, target.index);
+  if (element === null) {
+    return "";
+  }
+  return kindLabel(target.kind, element) + " " + element.name;
+}
+
+function currentDescriptionCase() {
+  if (state.diagramCase !== null) {
+    const chosen = findCase(state.diagramCase);
+    if (chosen !== null && chosen.description !== null) {
+      return chosen;
+    }
+  }
+  for (const caseData of store.cases) {
+    if (caseData.description !== null) {
+      state.diagramCase = caseData.name;
+      return caseData;
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------- Diagram layout
+
+function networkSignature(description) {
+  const names = [];
+  for (const bus of description.buses) {
+    names.push(bus.name);
+  }
+  return names.join("|");
+}
+
+// Spring layout of Fruchterman and Reingold: every pair of buses repels and every circuit pulls its two
+// buses together, while a falling temperature limits how far a bus moves in each iteration.
+function computeForceLayout(description) {
+  const count = description.buses.length;
+  const positions = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (2 * Math.PI * i) / count;
+    // A small fixed offset breaks the symmetry of the circle, so the layout is the same at every run.
+    const jitter = 0.02 * Math.sin(i * 12.9898);
+    positions.push({ x: 0.5 + 0.4 * Math.cos(angle) + jitter, y: 0.5 + 0.4 * Math.sin(angle) - jitter });
+  }
+
+  const edges = [];
+  for (const circuit of description.circuits) {
+    if (circuit.from !== circuit.to) {
+      edges.push([circuit.from - 1, circuit.to - 1]);
+    }
+  }
+
+  const k = Math.sqrt(1 / Math.max(count, 1));
+  const iterations = 600;
+  for (let iteration = 0; iteration < iterations; iteration++) {
+    const temperature = 0.1 * (1 - iteration / iterations) + 0.002;
+    const moves = [];
+    for (let i = 0; i < count; i++) {
+      moves.push({ x: 0, y: 0 });
+    }
+    for (let i = 0; i < count; i++) {
+      for (let j = i + 1; j < count; j++) {
+        const dx = positions[i].x - positions[j].x;
+        const dy = positions[i].y - positions[j].y;
+        const distance = Math.max(Math.hypot(dx, dy), 0.01);
+        const force = (k * k) / distance;
+        moves[i].x += (dx / distance) * force;
+        moves[i].y += (dy / distance) * force;
+        moves[j].x -= (dx / distance) * force;
+        moves[j].y -= (dy / distance) * force;
+      }
+    }
+    for (const edge of edges) {
+      const a = edge[0];
+      const b = edge[1];
+      const dx = positions[a].x - positions[b].x;
+      const dy = positions[a].y - positions[b].y;
+      const distance = Math.max(Math.hypot(dx, dy), 0.01);
+      const force = (distance * distance) / k;
+      moves[a].x -= (dx / distance) * force;
+      moves[a].y -= (dy / distance) * force;
+      moves[b].x += (dx / distance) * force;
+      moves[b].y += (dy / distance) * force;
+    }
+    for (let i = 0; i < count; i++) {
+      const length = Math.hypot(moves[i].x, moves[i].y);
+      if (length > 0) {
+        const step = Math.min(length, temperature);
+        positions[i].x += (moves[i].x / length) * step;
+        positions[i].y += (moves[i].y / length) * step;
+      }
+    }
+  }
+  return normalizeLayout(positions);
+}
+
+// Stretches the positions to fill the unit square.
+function normalizeLayout(positions) {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  for (const position of positions) {
+    minX = Math.min(minX, position.x);
+    maxX = Math.max(maxX, position.x);
+    minY = Math.min(minY, position.y);
+    maxY = Math.max(maxY, position.y);
+  }
+  const spanX = Math.max(maxX - minX, 1e-9);
+  const spanY = Math.max(maxY - minY, 1e-9);
+  const normalized = [];
+  for (const position of positions) {
+    normalized.push({ x: (position.x - minX) / spanX, y: (position.y - minY) / spanY });
+  }
+  return normalized;
+}
+
+function readStoredLayout(signature, count) {
+  let positions = null;
+  try {
+    const text = window.localStorage.getItem(layoutStoragePrefix() + signature);
+    if (text !== null) {
+      positions = JSON.parse(text);
+    }
+  } catch (error) {
+    return null;
+  }
+  if (!Array.isArray(positions) || positions.length !== count) {
+    return null;
+  }
+  for (const position of positions) {
+    if (typeof position.x !== "number" || typeof position.y !== "number") {
+      return null;
+    }
+  }
+  return positions;
+}
+
+// The positions are kept per network, so the cases of the same system share the arrangement chosen by hand.
+function layoutFor(description) {
+  const signature = networkSignature(description);
+  if (signature in layoutCache) {
+    return layoutCache[signature];
+  }
+  let positions = readStoredLayout(signature, description.buses.length);
+  if (positions === null) {
+    positions = computeForceLayout(description);
+  }
+  layoutCache[signature] = positions;
+  return positions;
+}
+
+function saveLayout(description) {
+  const signature = networkSignature(description);
+  try {
+    window.localStorage.setItem(layoutStoragePrefix() + signature, JSON.stringify(layoutCache[signature]));
+  } catch (error) {
+    // Without storage the arrangement only lasts until the page is closed.
+  }
+}
+
+function resetLayout() {
+  const caseData = currentDescriptionCase();
+  if (caseData === null) {
+    return;
+  }
+  const signature = networkSignature(caseData.description);
+  delete layoutCache[signature];
+  try {
+    window.localStorage.removeItem(layoutStoragePrefix() + signature);
+  } catch (error) {
+    // The stored arrangement may stay, but the page already shows the automatic one.
+  }
+  drawDiagram();
+}
+
+// Parallel circuits between the same two buses are shifted apart, so each one can be clicked.
+function circuitOffsets(description) {
+  const seen = {};
+  const offsets = [];
+  for (const circuit of description.circuits) {
+    const low = Math.min(circuit.from, circuit.to);
+    const high = Math.max(circuit.from, circuit.to);
+    const pair = low + "-" + high;
+    if (!(pair in seen)) {
+      seen[pair] = 0;
+    }
+    offsets.push(seen[pair] * 12);
+    seen[pair] += 1;
+  }
+  return offsets;
+}
+
+// Each bus is a horizontal bar, longer when more circuits connect to it.
+function busGeometry(view) {
+  const description = view.description;
+  const counts = [];
+  for (let i = 0; i < description.buses.length; i++) {
+    counts.push(0);
+  }
+  for (const circuit of description.circuits) {
+    counts[circuit.from - 1] += 1;
+    counts[circuit.to - 1] += 1;
+  }
+
+  const padding = view.padding;
+  const plotWidth = view.width - padding.left - padding.right;
+  const plotHeight = view.height - padding.top - padding.bottom;
+  const buses = [];
+  for (let i = 0; i < description.buses.length; i++) {
+    const position = view.positions[i];
+    const half = clamp(24 + 7 * counts[i], 32, 70);
+    buses.push({ x: padding.left + position.x * plotWidth, y: padding.top + position.y * plotHeight, half: half });
+  }
+  return buses;
+}
+
+// A circuit leaves its bar at the point closest to the other bus, so the wires spread along the bar.
+function attachPoint(bus, other, offset) {
+  const low = bus.x - bus.half + 6;
+  const high = bus.x + bus.half - 6;
+  const x = clamp(other.x + offset, low, high);
+  return { x: x, y: bus.y };
+}
+
+function circuitEnds(view, index) {
+  const circuit = view.description.circuits[index];
+  const from = view.buses[circuit.from - 1];
+  const to = view.buses[circuit.to - 1];
+  const offset = view.offsets[index];
+  return { a: attachPoint(from, to, offset), b: attachPoint(to, from, offset) };
+}
+
+// Generators hang above their bar and loads and shunts below it, spread when a bus has more than one.
+function decorationLayout(view) {
+  const description = view.description;
+  const above = [];
+  const below = [];
+  for (let i = 0; i < description.buses.length; i++) {
+    above.push([]);
+    below.push([]);
+  }
+  for (let g = 0; g < description.generators.length; g++) {
+    above[description.generators[g].bus - 1].push(g);
+  }
+  for (let l = 0; l < description.loads.length; l++) {
+    below[description.loads[l].bus - 1].push({ kind: "load", index: l });
+  }
+  for (let b = 0; b < description.buses.length; b++) {
+    const susceptance = quantityValue(description.buses[b].parameters, "B_shunt", "pu");
+    if (!Number.isNaN(susceptance) && susceptance !== 0) {
+      below[b].push({ kind: "shunt", index: b });
+    }
+  }
+
+  const generators = [];
+  const loads = [];
+  const shunts = [];
+  for (let b = 0; b < description.buses.length; b++) {
+    const bus = view.buses[b];
+    const aboveCount = above[b].length;
+    for (let j = 0; j < aboveCount; j++) {
+      const x = bus.x + (j - (aboveCount - 1) / 2) * 30;
+      generators[above[b][j]] = { x: x, y: bus.y - 38, busY: bus.y };
+    }
+    const belowCount = below[b].length;
+    for (let j = 0; j < belowCount; j++) {
+      const item = below[b][j];
+      const x = bus.x + (j - (belowCount - 1) / 2) * 24;
+      if (item.kind === "load") {
+        loads[item.index] = { x: x, busY: bus.y };
+      } else {
+        shunts.push({ bus: b, x: x, busY: bus.y });
+      }
+    }
+  }
+  return { generators: generators, loads: loads, shunts: shunts };
+}
+
+// ---------------------------------------------------------------- Diagram drawing
+
+function selectedClass(kind, index) {
+  const selected = state.selectedElement;
+  if (selected !== null && selected.kind === kind && selected.index === index) {
+    return " selected";
+  }
+  return "";
+}
+
+function circuitSvg(view, index) {
+  const circuit = view.description.circuits[index];
+  const ends = circuitEnds(view, index);
+  const a = ends.a;
+  const b = ends.b;
+  let svg = `<g class="dg-el${selectedClass("circuit", index)}" data-kind="circuit" data-index="${index}">`;
+  svg += `<line class="dg-hit" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="12"/>`;
+  svg += `<line class="dg-ink dg-wire" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
+  if (circuit.type === "transformer") {
+    const length = Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1e-9);
+    const ux = (b.x - a.x) / length;
+    const uy = (b.y - a.y) / length;
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    svg += `<circle class="dg-ink dg-device" cx="${mx - ux * 4.5}" cy="${my - uy * 4.5}" r="7"/>`;
+    svg += `<circle class="dg-ink dg-device" cx="${mx + ux * 4.5}" cy="${my + uy * 4.5}" r="7"/>`;
+  }
+  svg += "</g>";
+  return svg;
+}
+
+function generatorSvg(position, index) {
+  const x = position.x;
+  const y = position.y;
+  const radius = 12;
+  let svg = `<g class="dg-el${selectedClass("generator", index)}" data-kind="generator" data-index="${index}">`;
+  svg += `<line class="dg-ink" x1="${x}" y1="${position.busY}" x2="${x}" y2="${y + radius}" stroke-width="1.6"/>`;
+  svg += `<circle class="dg-ink dg-device" cx="${x}" cy="${y}" r="${radius}"/>`;
+  svg += `<path class="dg-ink" d="M${x - 6} ${y} Q${x - 3} ${y - 6} ${x} ${y} T${x + 6} ${y}" stroke-width="1.6"/>`;
+  svg += "</g>";
+  return svg;
+}
+
+function loadSvg(position, index) {
+  const x = position.x;
+  const y = position.busY;
+  let svg = `<g class="dg-el${selectedClass("load", index)}" data-kind="load" data-index="${index}">`;
+  svg += `<line class="dg-hit" x1="${x}" y1="${y}" x2="${x}" y2="${y + 30}" stroke-width="12"/>`;
+  svg += `<line class="dg-ink" x1="${x}" y1="${y}" x2="${x}" y2="${y + 22}" stroke-width="1.6"/>`;
+  svg += `<polygon class="dg-fill" points="${x - 5},${y + 21} ${x + 5},${y + 21} ${x},${y + 30}"/>`;
+  svg += "</g>";
+  return svg;
+}
+
+// The shunt belongs to the bus in the model, so clicking it opens the bus.
+function shuntSvg(item) {
+  const x = item.x;
+  const y = item.busY;
+  let svg = `<g class="dg-el" data-kind="bus" data-index="${item.bus}">`;
+  svg += `<line class="dg-hit" x1="${x}" y1="${y}" x2="${x}" y2="${y + 34}" stroke-width="14"/>`;
+  svg += `<line class="dg-ink" x1="${x}" y1="${y}" x2="${x}" y2="${y + 14}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x - 8}" y1="${y + 14}" x2="${x + 8}" y2="${y + 14}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x - 8}" y1="${y + 19}" x2="${x + 8}" y2="${y + 19}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x}" y1="${y + 19}" x2="${x}" y2="${y + 26}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x - 6}" y1="${y + 26}" x2="${x + 6}" y2="${y + 26}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x - 4}" y1="${y + 29}" x2="${x + 4}" y2="${y + 29}" stroke-width="1.6"/>`;
+  svg += `<line class="dg-ink" x1="${x - 2}" y1="${y + 32}" x2="${x + 2}" y2="${y + 32}" stroke-width="1.6"/>`;
+  svg += "</g>";
+  return svg;
+}
+
+function busSvg(bus, index) {
+  const left = bus.x - bus.half;
+  const right = bus.x + bus.half;
+  let svg = `<g class="dg-el dg-bus${selectedClass("bus", index)}" data-kind="bus" data-index="${index}">`;
+  svg += `<line class="dg-hit" x1="${left}" y1="${bus.y}" x2="${right}" y2="${bus.y}" stroke-width="16"/>`;
+  svg += `<line class="dg-ink dg-bar" x1="${left}" y1="${bus.y}" x2="${right}" y2="${bus.y}"/>`;
+  svg += "</g>";
+  return svg;
+}
+
+function busLabelSvg(busData, bus) {
+  const x = bus.x + bus.half + 6;
+  const magnitude = quantityValue(busData.initial, "V", "pu");
+  const angle = quantityValue(busData.initial, "theta", "deg");
+  const voltage = formatFixed(magnitude, 3) + " ∠ " + formatFixed(angle, 1) + "°";
+  let svg = `<text class="dg-label" x="${x}" y="${bus.y - 2}">${escapeHtml(busData.name)}</text>`;
+  svg += `<text class="dg-sublabel" x="${x}" y="${bus.y + 11}">${voltage}</text>`;
+  return svg;
+}
+
+function boltSvg(x, y) {
+  return `<path class="dg-event-mark" d="M${x + 3} ${y - 11} L${x - 4} ${y + 1} L${x} ${y + 1} L${x - 2} ${y + 11} L${x + 5} ${y - 2} L${x + 1} ${y - 2} Z"/>`;
+}
+
+function crossSvg(x, y) {
+  let svg = `<circle class="dg-event-back" cx="${x}" cy="${y}" r="7"/>`;
+  svg += `<line class="dg-event-cross" x1="${x - 4}" y1="${y - 4}" x2="${x + 4}" y2="${y + 4}"/>`;
+  svg += `<line class="dg-event-cross" x1="${x - 4}" y1="${y + 4}" x2="${x + 4}" y2="${y - 4}"/>`;
+  return svg;
+}
+
+// A short circuit is a bolt next to its bus and a trip is a cross on the element. The removal of a short
+// circuit is not drawn, because its short circuit already is.
+function eventSvg(view, eventIndex) {
+  const event = view.description.perturbations[eventIndex];
+  if ("short_circuit" in event.targets) {
+    return "";
+  }
+  const target = eventTarget(view.description, eventIndex);
+  if (target === null) {
+    return "";
+  }
+
+  let mark = "";
+  if (target.kind === "bus") {
+    const bus = view.buses[target.index];
+    mark = boltSvg(bus.x - bus.half - 14, bus.y);
+  } else if (target.kind === "circuit") {
+    const ends = circuitEnds(view, target.index);
+    const x = ends.a.x + 0.3 * (ends.b.x - ends.a.x);
+    const y = ends.a.y + 0.3 * (ends.b.y - ends.a.y);
+    mark = crossSvg(x, y);
+  } else if (target.kind === "generator") {
+    const position = view.decorations.generators[target.index];
+    mark = crossSvg(position.x + 11, position.y - 11);
+  } else if (target.kind === "load") {
+    const position = view.decorations.loads[target.index];
+    mark = crossSvg(position.x + 9, position.busY + 24);
+  }
+  if (mark === "") {
+    return "";
+  }
+  return `<g class="dg-el" data-kind="event" data-index="${eventIndex}">${mark}</g>`;
+}
+
+function drawDiagram() {
+  const container = document.getElementById("diagram");
+  const caseData = currentDescriptionCase();
+  if (caseData === null) {
+    diagramView = null;
+    container.innerHTML =
+      '<div class="no-series">Este resultado não tem o arquivo case.json, que descreve a rede. ' +
+      "Rode o caso de novo com a versão atual do nsLFT para ver o diagrama.</div>";
+    return;
+  }
+
+  const description = caseData.description;
+  const width = Math.max(container.clientWidth, 480);
+  let height = Math.round(width * 0.56);
+  height = clamp(height, 440, 760);
+  const view = {
+    description: description,
+    positions: layoutFor(description),
+    width: width,
+    height: height,
+    padding: diagramPadding(),
+    offsets: circuitOffsets(description),
+  };
+  view.buses = busGeometry(view);
+  view.decorations = decorationLayout(view);
+  diagramView = view;
+
+  // The wires go first so the bars, the devices and the labels are drawn over them.
+  let svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
+  for (let c = 0; c < description.circuits.length; c++) {
+    svg += circuitSvg(view, c);
+  }
+  for (let g = 0; g < description.generators.length; g++) {
+    svg += generatorSvg(view.decorations.generators[g], g);
+  }
+  for (let l = 0; l < description.loads.length; l++) {
+    svg += loadSvg(view.decorations.loads[l], l);
+  }
+  for (const shunt of view.decorations.shunts) {
+    svg += shuntSvg(shunt);
+  }
+  for (let b = 0; b < description.buses.length; b++) {
+    svg += busSvg(view.buses[b], b);
+  }
+  for (let b = 0; b < description.buses.length; b++) {
+    svg += busLabelSvg(description.buses[b], view.buses[b]);
+  }
+  for (let p = 0; p < description.perturbations.length; p++) {
+    svg += eventSvg(view, p);
+  }
+  svg += "</svg>";
+  container.innerHTML = svg;
+}
+
+// ---------------------------------------------------------------- Diagram page
+
+function renderDiagramCasePicker() {
+  const picker = document.getElementById("diagram-case-picker");
+  const described = [];
+  for (const caseData of store.cases) {
+    if (caseData.description !== null) {
+      described.push(caseData.name);
+    }
+  }
+  if (described.length < 2) {
+    picker.innerHTML = "";
+    return;
+  }
+  let html = '<div class="chips">';
+  for (const name of described) {
+    let on = "";
+    if (name === state.diagramCase) {
+      on = " on";
+    }
+    const escaped = escapeHtml(name);
+    html += `<button class="chip${on}" data-action="set-diagram-case" data-case="${escaped}">${escaped}</button>`;
+  }
+  html += "</div>";
+  picker.innerHTML = html;
+}
+
+function factHtml(label, value) {
+  return `<div class="fact"><div class="fact-label">${escapeHtml(label)}</div><div class="fact-value">${escapeHtml(value)}</div></div>`;
+}
+
+function renderFacts(caseData) {
+  const facts = document.getElementById("case-facts");
+  if (caseData === null) {
+    facts.innerHTML = "";
+    return;
+  }
+  const description = caseData.description;
+  const system = description.system;
+  const Sb = quantityValue(system, "Sb", "MVA");
+  const fb = quantityValue(system, "fb", "Hz");
+  const step = quantityValue(system, "integration_step", "s");
+  const horizon = quantityValue(system, "simulation_horizon", "s");
+
+  const models = [];
+  for (const generator of description.generators) {
+    const info = describeModel(generator.model);
+    if (!models.includes(info.name)) {
+      models.push(info.name);
+    }
+  }
+
+  let html = "";
+  html += factHtml("Base", formatValue(Sb) + " MVA · " + formatValue(fb) + " Hz");
+  html += factHtml("Integração", "Δt " + formatValue(step) + " s · T " + formatValue(horizon) + " s");
+  html += factHtml("Rede", description.buses.length + " barras · " + description.circuits.length + " circuitos");
+  html += factHtml("Injeções", description.generators.length + " geradores · " + description.loads.length + " cargas");
+  html += factHtml("Modelo dos geradores", models.join(", "));
+  facts.innerHTML = html;
+}
+
+function compareByTime(a, b) {
+  return a.time - b.time;
+}
+
+function renderEvents(caseData) {
+  const list = document.getElementById("events-list");
+  if (caseData === null) {
+    list.innerHTML = '<p class="hint">Sem descrição do caso.</p>';
+    return;
+  }
+  const description = caseData.description;
+  const order = [];
+  for (let p = 0; p < description.perturbations.length; p++) {
+    order.push({ index: p, time: description.perturbations[p].time });
+  }
+  order.sort(compareByTime);
+  if (order.length === 0) {
+    list.innerHTML = '<p class="hint">Este caso não tem perturbações.</p>';
+    return;
+  }
+
+  let html = "";
+  for (const item of order) {
+    const event = description.perturbations[item.index];
+    const target = eventTarget(description, item.index);
+    const targetText = elementTitle(description, target);
+    html +=
+      `<button class="event-row" data-action="select-event" data-index="${item.index}">` +
+      `<span class="time-badge">t = ${formatValue(event.time)} s</span>` +
+      `<span><span class="event-type">${escapeHtml(eventTypeLabel(event.type))}</span> ` +
+      `<span class="event-name">${escapeHtml(event.name)}</span></span>` +
+      `<span class="event-target">${escapeHtml(targetText)}</span></button>`;
+  }
+  list.innerHTML = html;
+}
+
+function quantityTable(kind, quantities) {
+  if (!Array.isArray(quantities) || quantities.length === 0) {
+    return '<p class="section-note">Sem valores.</p>';
+  }
+  let html = '<table class="q-table"><tbody>';
+  for (const quantity of quantities) {
+    const info = describeQuantity(kind, quantity.key);
+    let value = "–";
+    let alternatives = "";
+    if (quantity.values.length > 0) {
+      value = formatEntry(quantity.values[0]);
+    }
+    const others = [];
+    for (let i = 1; i < quantity.values.length; i++) {
+      others.push(formatEntry(quantity.values[i]));
+    }
+    if (others.length > 0) {
+      alternatives = `<span class="q-alt">${escapeHtml(others.join(" · "))}</span>`;
+    }
+    let label = "";
+    if (info.label !== "") {
+      label = `<span class="q-label">${escapeHtml(info.label)}</span>`;
+    }
+    html +=
+      `<tr><td><span class="q-symbol">${escapeHtml(info.symbol)}</span>${label}</td>` +
+      `<td class="q-value">${escapeHtml(value)}${alternatives}</td></tr>`;
+  }
+  html += "</tbody></table>";
+  return html;
+}
+
+function elementChip(kind, index, label) {
+  return `<button class="chip" data-action="select-element" data-kind="${kind}" data-index="${index}">${escapeHtml(label)}</button>`;
+}
+
+function connectionsHtml(description, kind, index) {
+  let chips = "";
+  if (kind === "bus") {
+    for (let g = 0; g < description.generators.length; g++) {
+      if (description.generators[g].bus - 1 === index) {
+        chips += elementChip("generator", g, description.generators[g].name);
+      }
+    }
+    for (let l = 0; l < description.loads.length; l++) {
+      if (description.loads[l].bus - 1 === index) {
+        chips += elementChip("load", l, description.loads[l].name);
+      }
+    }
+    for (let c = 0; c < description.circuits.length; c++) {
+      const circuit = description.circuits[c];
+      if (circuit.from - 1 === index || circuit.to - 1 === index) {
+        chips += elementChip("circuit", c, circuit.name);
+      }
+    }
+  } else if (kind === "circuit") {
+    const circuit = description.circuits[index];
+    chips += elementChip("bus", circuit.from - 1, "De " + description.buses[circuit.from - 1].name);
+    chips += elementChip("bus", circuit.to - 1, "Para " + description.buses[circuit.to - 1].name);
+  } else {
+    const element = elementOf(description, kind, index);
+    chips += elementChip("bus", element.bus - 1, description.buses[element.bus - 1].name);
+  }
+  return `<h4>Conexões</h4><div class="chips">${chips}</div>`;
+}
+
+function elementEventsHtml(description, kind, index) {
+  let rows = "";
+  for (let p = 0; p < description.perturbations.length; p++) {
+    const target = eventTarget(description, p);
+    if (target === null || target.kind !== kind || target.index !== index) {
+      continue;
+    }
+    const event = description.perturbations[p];
+    rows +=
+      `<div class="event-row"><span class="time-badge">t = ${formatValue(event.time)} s</span>` +
+      `<span><span class="event-type">${escapeHtml(eventTypeLabel(event.type))}</span> ` +
+      `<span class="event-name">${escapeHtml(event.name)}</span></span></div>`;
+    if (event.parameters.length > 0) {
+      rows += quantityTable("event", event.parameters);
+    }
+  }
+  if (rows === "") {
+    return "";
+  }
+  return `<h4>Eventos</h4>${rows}`;
+}
+
+function modelHtml(kind, element) {
+  let model = null;
+  if (kind === "generator" || kind === "load") {
+    model = element.model;
+  } else if (kind === "circuit") {
+    model = element.type;
+  }
+  if (model === null) {
+    return "";
+  }
+  const info = describeModel(model);
+  let html = `<h4>Modelo</h4><span class="badge">${escapeHtml(info.name)}</span>`;
+  if (info.description !== "") {
+    html += `<p class="model-text">${escapeHtml(info.description)}</p>`;
+  }
+  return html;
+}
+
+function renderDetails(caseData) {
+  const panel = document.getElementById("details");
+  const selected = state.selectedElement;
+  if (caseData === null || selected === null) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  const description = caseData.description;
+  const element = elementOf(description, selected.kind, selected.index);
+  if (element === null) {
+    state.selectedElement = null;
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+
+  let parametersTitle = "Parâmetros";
+  let parametersNote = "";
+  if (selected.kind === "bus") {
+    parametersTitle = "Dados de entrada";
+  } else if (selected.kind === "generator") {
+    parametersNote = '<p class="section-note">Valores na base da máquina, como estão nos dados do caso.</p>';
+  } else if (selected.kind === "circuit") {
+    parametersNote = '<p class="section-note">Valores em pu na base do sistema.</p>';
+  }
+
+  let html =
+    `<div class="details-head"><div><div class="details-kind">${escapeHtml(kindLabel(selected.kind, element))}</div>` +
+    `<h3>${escapeHtml(element.name)}</h3></div>` +
+    `<button class="icon-btn" data-action="close-details" aria-label="Fechar" title="Fechar (Esc)">×</button></div>`;
+  html += modelHtml(selected.kind, element);
+  html += "<h4>Ponto inicial em t = 0 s</h4>";
+  html += quantityTable(selected.kind, element.initial);
+  html += `<h4>${parametersTitle}</h4>${parametersNote}`;
+  html += quantityTable(selected.kind, element.parameters);
+  html += connectionsHtml(description, selected.kind, selected.index);
+  html += elementEventsHtml(description, selected.kind, selected.index);
+  panel.innerHTML = html;
+  panel.hidden = false;
+}
+
+// The details panel is laid out before the diagram, because it takes width from it.
+function renderDiagramPage() {
+  const caseData = currentDescriptionCase();
+  renderDiagramCasePicker();
+  renderFacts(caseData);
+  renderDetails(caseData);
+  renderEvents(caseData);
+  drawDiagram();
+}
+
+function selectElement(kind, index) {
+  const caseData = currentDescriptionCase();
+  if (caseData === null) {
+    return;
+  }
+  let target = { kind: kind, index: index };
+  if (kind === "event") {
+    target = eventTarget(caseData.description, index);
+    if (target === null) {
+      return;
+    }
+  }
+  state.selectedElement = target;
+  hideTooltip();
+  renderDiagramPage();
+  document.getElementById("details").scrollTop = 0;
+}
+
+function closeDetails() {
+  state.selectedElement = null;
+  renderDiagramPage();
+}
+
+function hideTooltip() {
+  document.getElementById("tooltip").style.display = "none";
+}
+
+function tooltipRow(label, value) {
+  return `<div class="tooltip-row"><span>${escapeHtml(label)}</span><span class="value">${escapeHtml(value)}</span></div>`;
+}
+
+function diagramTooltipHtml(description, kind, index) {
+  if (kind === "event") {
+    const event = description.perturbations[index];
+    return (
+      `<div class="tooltip-time">t = ${formatValue(event.time)} s</div>` +
+      `<div>${escapeHtml(eventTypeLabel(event.type))}</div><div>${escapeHtml(event.name)}</div>` +
+      '<div class="tooltip-hint">Clique para ver o elemento</div>'
+    );
+  }
+  const element = elementOf(description, kind, index);
+  if (element === null) {
+    return "";
+  }
+
+  let rows = "";
+  if (kind === "bus") {
+    rows += tooltipRow("|V|", formatFixed(quantityValue(element.initial, "V", "pu"), 4) + " pu");
+    rows += tooltipRow("θ", formatFixed(quantityValue(element.initial, "theta", "deg"), 2) + "°");
+  } else if (kind === "circuit") {
+    const fromName = description.buses[element.from - 1].name;
+    const toName = description.buses[element.to - 1].name;
+    rows += tooltipRow("P " + fromName + " → " + toName, formatFixed(quantityValue(element.initial, "P_from", "MW"), 2) + " MW");
+    rows += tooltipRow("Q " + fromName + " → " + toName, formatFixed(quantityValue(element.initial, "Q_from", "Mvar"), 2) + " Mvar");
+  } else if (kind === "generator") {
+    rows += tooltipRow("P", formatFixed(quantityValue(element.initial, "P_terminal", "MW"), 2) + " MW");
+    rows += tooltipRow("Q", formatFixed(quantityValue(element.initial, "Q_terminal", "Mvar"), 2) + " Mvar");
+    rows += tooltipRow("Modelo", describeModel(element.model).name);
+  } else if (kind === "load") {
+    rows += tooltipRow("P", formatFixed(quantityValue(element.initial, "P", "MW"), 2) + " MW");
+    rows += tooltipRow("Q", formatFixed(quantityValue(element.initial, "Q", "Mvar"), 2) + " Mvar");
+  }
+  return (
+    `<div class="tooltip-time">${escapeHtml(kindLabel(kind, element))} ${escapeHtml(element.name)}</div>` +
+    rows +
+    '<div class="tooltip-hint">Clique para ver os detalhes</div>'
+  );
+}
+
+function onDiagramPointerDown(event) {
+  if (event.button !== 0) {
+    return;
+  }
+  const element = event.target.closest("[data-kind]");
+  if (element === null) {
+    return;
+  }
+  pointerTarget = {
+    kind: element.dataset.kind,
+    index: Number(element.dataset.index),
+    startX: event.clientX,
+    startY: event.clientY,
+    moved: false,
+  };
+  if (pointerTarget.kind === "bus") {
+    // The capture stays on the container, because the drawing is replaced while the bus moves.
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+}
+
+function moveBus(index, clientX, clientY) {
+  const view = diagramView;
+  const svg = document.querySelector("#diagram svg");
+  if (view === null || svg === null) {
+    return;
+  }
+  const rect = svg.getBoundingClientRect();
+  const padding = view.padding;
+  const plotWidth = view.width - padding.left - padding.right;
+  const plotHeight = view.height - padding.top - padding.bottom;
+  let x = (clientX - rect.left - padding.left) / plotWidth;
+  let y = (clientY - rect.top - padding.top) / plotHeight;
+  x = clamp(x, 0, 1);
+  y = clamp(y, 0, 1);
+  view.positions[index] = { x: x, y: y };
+  drawDiagram();
+}
+
+// A pointer that moves more than a few pixels over a bus drags it, and a still one opens the details.
+function onDiagramPointerMove(event) {
+  if (pointerTarget !== null && pointerTarget.kind === "bus") {
+    const distance = Math.hypot(event.clientX - pointerTarget.startX, event.clientY - pointerTarget.startY);
+    if (!pointerTarget.moved && distance < 4) {
+      return;
+    }
+    pointerTarget.moved = true;
+    hideTooltip();
+    moveBus(pointerTarget.index, event.clientX, event.clientY);
+    return;
+  }
+  const element = event.target.closest("[data-kind]");
+  if (element === null || diagramView === null) {
+    hideTooltip();
+    return;
+  }
+  const html = diagramTooltipHtml(diagramView.description, element.dataset.kind, Number(element.dataset.index));
+  if (html === "") {
+    hideTooltip();
+    return;
+  }
+  placeTooltip(html, event.clientX, event.clientY);
+}
+
+function onDiagramPointerUp() {
+  if (pointerTarget === null) {
+    return;
+  }
+  const target = pointerTarget;
+  pointerTarget = null;
+  if (target.moved) {
+    if (diagramView !== null) {
+      saveLayout(diagramView.description);
+    }
+    return;
+  }
+  selectElement(target.kind, target.index);
+}
+
+function onDiagramPointerCancel() {
+  pointerTarget = null;
+}
+
+function onDiagramPointerLeave() {
+  if (pointerTarget === null) {
+    hideTooltip();
+  }
+}
+
 // ---------------------------------------------------------------- Actions
 
 function handleAction(element) {
@@ -1617,11 +2999,59 @@ function handleAction(element) {
   } else if (action === "open-folder") {
     document.getElementById("folder-input").click();
     return;
+  } else if (action === "set-tab") {
+    setTab(element.dataset.tab);
+  } else if (action === "select-element") {
+    selectElement(element.dataset.kind, Number(element.dataset.index));
+    return;
+  } else if (action === "select-event") {
+    selectElement("event", Number(element.dataset.index));
+    return;
+  } else if (action === "close-details") {
+    closeDetails();
+    return;
+  } else if (action === "set-diagram-case") {
+    state.diagramCase = element.dataset.case;
+    state.selectedElement = null;
+    renderDiagramPage();
+    return;
+  } else if (action === "reset-layout") {
+    resetLayout();
+    return;
   } else {
     return;
   }
   saveState();
   renderAll();
+}
+
+function setTab(tab) {
+  state.tab = tab;
+  let hash = "#diagrama";
+  if (tab === "charts") {
+    hash = "#graficos";
+  }
+  try {
+    window.history.replaceState(null, "", hash);
+  } catch (error) {
+    // Some pages opened from the disk refuse to change the address, and the tab still changes.
+  }
+}
+
+function tabFromAddress() {
+  if (window.location.hash === "#graficos") {
+    return "charts";
+  }
+  if (window.location.hash === "#diagrama") {
+    return "diagram";
+  }
+  // Without a description there is no diagram to show, so the page opens on the charts.
+  for (const caseData of store.cases) {
+    if (caseData.description !== null) {
+      return "diagram";
+    }
+  }
+  return "charts";
 }
 
 // Opening a menu only shows it, because the menus are already in the page with the charts.
@@ -1702,6 +3132,9 @@ function onDocumentClick(event) {
 function onDocumentKeyDown(event) {
   if (event.key === "Escape") {
     closeElementsMenu();
+    if (state.tab === "diagram" && state.selectedElement !== null) {
+      closeDetails();
+    }
   }
 }
 
@@ -1719,7 +3152,11 @@ function onFolderChosen(event) {
 
 function onResizeFrame() {
   resizeScheduled = false;
-  renderCharts();
+  if (state.tab === "charts") {
+    renderCharts();
+  } else {
+    drawDiagram();
+  }
 }
 
 function onWindowResize() {
@@ -1734,6 +3171,7 @@ function init() {
   loadEmbeddedData();
   restoreState();
   ensureDefaults();
+  state.tab = tabFromAddress();
 
   document.addEventListener("click", onDocumentClick);
   document.addEventListener("keydown", onDocumentKeyDown);
@@ -1748,6 +3186,13 @@ function init() {
   container.addEventListener("mouseleave", onChartsMouseLeave);
   window.addEventListener("mouseup", onWindowMouseUp);
   window.addEventListener("resize", onWindowResize);
+
+  const diagram = document.getElementById("diagram");
+  diagram.addEventListener("pointerdown", onDiagramPointerDown);
+  diagram.addEventListener("pointermove", onDiagramPointerMove);
+  diagram.addEventListener("pointerup", onDiagramPointerUp);
+  diagram.addEventListener("pointercancel", onDiagramPointerCancel);
+  diagram.addEventListener("pointerleave", onDiagramPointerLeave);
 
   renderAll();
 }

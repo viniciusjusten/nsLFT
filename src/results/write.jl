@@ -35,7 +35,7 @@ function output_units(inputs::Inputs, field::Symbol)
         return [("pu", 1.0), ("Hz", fb(inputs))]
     elseif field == :Pmec || field == :Pele
         return [("pu", 1.0), ("MW", Sb(inputs))]
-    elseif field == :ed_prime || field == :eq_prime || field == :efd
+    elseif field == :Eq_prime || field == :ed_prime || field == :eq_prime || field == :efd
         return [("pu", 1.0)]
     elseif field == :id || field == :iq
         return [("pu", 1.0)]
@@ -116,6 +116,7 @@ function write_results(inputs::Inputs, results::Results, output_path::String = j
     generator_names = [generator_name(generator) for generator in inputs.generators]
     write_class_results(inputs, output_path, "generator", time, generator_names, results.generator)
 
+    write_case_description(inputs, results, output_path)
     write_dashboard(output_path)
 
     return nothing
