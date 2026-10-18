@@ -205,3 +205,5 @@ end
 # perturbations = [nsLFT.GeneratorTrip(; name = "UG2 trip", generator_idx = 2, time = 1.0)]
 # inputs = ieee14_inputs("data/ieee14", "results/ieee14_1d1q-gov-trip-ug2", perturbations = perturbations, generator_model = "one_d_one_q", gov = true)
 # results = nsLFT.solve(inputs)
+
+nothing

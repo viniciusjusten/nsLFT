@@ -492,6 +492,8 @@ function defaultState() {
     hiddenSeries: [],
     mode: "separate",
     xRange: null,
+    // The value range of each zoomed chart, keyed by the chart id. Charts without one fit their data.
+    yRanges: {},
     search: "",
     // The id of the chart whose element menu is open, or null when every menu is closed.
     openElementsMenu: null,
@@ -1013,7 +1015,7 @@ function renderHeader() {
     button.classList.toggle("active", button.dataset.mode === state.mode);
   }
   document.getElementById("chart-controls").hidden = state.tab !== "charts";
-  document.getElementById("reset-zoom").hidden = state.xRange === null;
+  document.getElementById("reset-zoom").hidden = !isZoomed();
 
   let hint = "Cada variável selecionada ganha o seu próprio gráfico.";
   if (state.mode === "combined") {
@@ -1402,8 +1404,13 @@ function timeDomain(spec) {
   return [min, max];
 }
 
-// The y range covers only the part of each visible series that falls inside the time range.
+// The y range covers only the part of each visible series that falls inside the time range,
+// unless the chart was zoomed into a value range.
 function valueDomain(spec, x0, x1) {
+  const zoomed = state.yRanges[spec.id];
+  if (zoomed !== undefined) {
+    return zoomed;
+  }
   let min = Infinity;
   let max = -Infinity;
   for (const series of spec.series) {
@@ -1619,7 +1626,7 @@ function drawChart(spec, index, element) {
   }
 
   svg += `<line class="crosshair" x1="0" x2="0" y1="${geom.top}" y2="${bottom}" visibility="hidden"/>`;
-  svg += `<rect class="selection" x="0" y="${geom.top}" width="0" height="${geom.plotHeight}" visibility="hidden"/>`;
+  svg += `<rect class="selection" x="0" y="0" width="0" height="0" visibility="hidden"/>`;
   svg += `<rect class="overlay" data-chart="${index}" x="${geom.left}" y="${geom.top}" width="${geom.plotWidth}" height="${geom.plotHeight}" fill="transparent"/>`;
   svg += "</svg>";
 
@@ -1737,13 +1744,75 @@ function hideHover() {
   }
 }
 
-function updateSelection(spec, t) {
+// The pointer position inside the plot area, in the pixel units of the chart drawing.
+function pointerInPlot(spec, overlay, clientX, clientY) {
+  const rect = overlay.getBoundingClientRect();
+  let fractionX = (clientX - rect.left) / rect.width;
+  fractionX = clamp(fractionX, 0, 1);
+  let fractionY = (clientY - rect.top) / rect.height;
+  fractionY = clamp(fractionY, 0, 1);
+  const x = spec.geom.left + fractionX * spec.geom.plotWidth;
+  const y = spec.geom.top + fractionY * spec.geom.plotHeight;
+  return { x: x, y: y };
+}
+
+function fromPixelX(geom, x) {
+  return geom.x0 + ((x - geom.left) / geom.plotWidth) * (geom.x1 - geom.x0);
+}
+
+function fromPixelY(geom, y) {
+  return geom.y0 + (1 - (y - geom.top) / geom.plotHeight) * (geom.y1 - geom.y0);
+}
+
+// The smallest drag, in pixels along an axis, that zooms that axis.
+function minZoomPixels() {
+  return 10;
+}
+
+// A drag that is nearly flat zooms only time, a nearly upright one zooms only values,
+// and any other drag zooms both into the rectangle.
+function zoomAxes(selection) {
+  const width = Math.abs(selection.current.x - selection.start.x);
+  const height = Math.abs(selection.current.y - selection.start.y);
+  return { x: width >= minZoomPixels(), y: height >= minZoomPixels() };
+}
+
+function isZoomed() {
+  const zoomedCharts = Object.keys(state.yRanges);
+  return state.xRange !== null || zoomedCharts.length > 0;
+}
+
+function resetZoom() {
+  state.xRange = null;
+  state.yRanges = {};
+}
+
+// The selection spans the whole plot along an axis that the drag will not zoom.
+function updateSelection(spec) {
+  const geom = spec.geom;
+  const axes = zoomAxes(drag);
   const rect = spec.svg.querySelector(".selection");
-  const start = toPixelX(spec.geom, drag.start);
-  const current = toPixelX(spec.geom, t);
-  rect.setAttribute("x", Math.min(start, current).toFixed(1));
-  rect.setAttribute("width", Math.abs(current - start).toFixed(1));
-  rect.setAttribute("visibility", "visible");
+  let x = geom.left;
+  let width = geom.plotWidth;
+  if (axes.x) {
+    x = Math.min(drag.start.x, drag.current.x);
+    width = Math.abs(drag.current.x - drag.start.x);
+  }
+  let y = geom.top;
+  let height = geom.plotHeight;
+  if (axes.y) {
+    y = Math.min(drag.start.y, drag.current.y);
+    height = Math.abs(drag.current.y - drag.start.y);
+  }
+  rect.setAttribute("x", x.toFixed(1));
+  rect.setAttribute("y", y.toFixed(1));
+  rect.setAttribute("width", width.toFixed(1));
+  rect.setAttribute("height", height.toFixed(1));
+  if (axes.x || axes.y) {
+    rect.setAttribute("visibility", "visible");
+  } else {
+    rect.setAttribute("visibility", "hidden");
+  }
 }
 
 function onChartsMouseMove(event) {
@@ -1756,8 +1825,8 @@ function onChartsMouseMove(event) {
   const spec = charts[index];
   const t = timeAtPointer(spec, overlay, event.clientX);
   if (drag !== null && drag.chart === index) {
-    drag.current = t;
-    updateSelection(spec, t);
+    drag.current = pointerInPlot(spec, overlay, event.clientX, event.clientY);
+    updateSelection(spec);
   }
   updateCrosshairs(t);
   showTooltip(spec, t, event.clientX, event.clientY);
@@ -1770,11 +1839,12 @@ function onChartsMouseDown(event) {
   }
   event.preventDefault();
   const index = Number(overlay.dataset.chart);
-  const t = timeAtPointer(charts[index], overlay, event.clientX);
-  drag = { chart: index, start: t, current: t };
+  const point = pointerInPlot(charts[index], overlay, event.clientX, event.clientY);
+  drag = { chart: index, start: point, current: point };
 }
 
-// A drag wider than a few pixels zooms every chart into the selected time interval.
+// The time interval of a selection applies to every chart, so they stay aligned in time,
+// while its value interval applies only to the chart where it was drawn.
 function onWindowMouseUp() {
   if (drag === null) {
     return;
@@ -1785,23 +1855,32 @@ function onWindowMouseUp() {
   if (!spec || !spec.geom) {
     return;
   }
-  const startPixel = toPixelX(spec.geom, finished.start);
-  const endPixel = toPixelX(spec.geom, finished.current);
-  if (Math.abs(endPixel - startPixel) < 6) {
+  const geom = spec.geom;
+  const axes = zoomAxes(finished);
+  if (!axes.x && !axes.y) {
     spec.svg.querySelector(".selection").setAttribute("visibility", "hidden");
     return;
   }
-  state.xRange = [Math.min(finished.start, finished.current), Math.max(finished.start, finished.current)];
+  if (axes.x) {
+    const startTime = fromPixelX(geom, finished.start.x);
+    const endTime = fromPixelX(geom, finished.current.x);
+    state.xRange = [Math.min(startTime, endTime), Math.max(startTime, endTime)];
+  }
+  if (axes.y) {
+    const startValue = fromPixelY(geom, finished.start.y);
+    const endValue = fromPixelY(geom, finished.current.y);
+    state.yRanges[spec.id] = [Math.min(startValue, endValue), Math.max(startValue, endValue)];
+  }
   renderHeader();
   renderCharts();
 }
 
 function onChartsDoubleClick(event) {
   const overlay = event.target.closest(".overlay");
-  if (overlay === null || state.xRange === null) {
+  if (overlay === null || !isZoomed()) {
     return;
   }
-  state.xRange = null;
+  resetZoom();
   renderHeader();
   renderCharts();
 }
@@ -2997,7 +3076,7 @@ function handleAction(element) {
   } else if (action === "set-mode") {
     state.mode = element.dataset.mode;
   } else if (action === "reset-zoom") {
-    state.xRange = null;
+    resetZoom();
   } else if (action === "open-folder") {
     document.getElementById("folder-input").click();
     return;
