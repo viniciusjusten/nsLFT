@@ -6,6 +6,9 @@
     inputs = ieee14_inputs(data_path, @__DIR__; perturbations = perturbations)
     results = nsLFT.solve(inputs)
 
+    # every trajectory matches the one stored in the reference file
+    test_trajectories(inputs, results, joinpath(@__DIR__, "reference", "trajectories.csv"))
+
     time = nsLFT.time_values(inputs)
     # half a step of margin so that the comparisons do not depend on the rounding of ts * integration_step
     margin = nsLFT.integration_step(inputs) / 2

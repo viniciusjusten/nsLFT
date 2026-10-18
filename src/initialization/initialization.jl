@@ -32,7 +32,7 @@ function initialization(inputs::Inputs)
     initialize_buses!(inputs, results)
     initialize_generators!(inputs, results)
     initialize_Ybus!(inputs)
-    solve_network!(inputs, results, 0) # V and Pele at t = 0 from the initial states
+    solve_network!(inputs, results, 1) # V and Pele at t = 0 from the initial states
     initialize_mechanical_powers!(inputs, results)
 
     return results

@@ -2,6 +2,9 @@
 mutable struct StepCache
     delta::Vector{Float64}
     omega::Vector{Float64}
+    eq_prime::Vector{Float64}
+    ed_prime::Vector{Float64}
+    efd::Vector{Float64}
     Vr::Vector{Float64}
     Vi::Vector{Float64}
 end
@@ -9,13 +12,24 @@ end
 function StepCache(inputs::Inputs)
     n_generators = num_generators(inputs)
     n_buses = num_buses(inputs)
-    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
+    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
 end
 
 function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCache)
     for gen_idx in 1:num_generators(inputs)
         caches.delta[gen_idx] = results.generator[gen_idx].delta[ts+1]
         caches.omega[gen_idx] = results.generator[gen_idx].omega[ts+1]
+        if results.generator[gen_idx] isa ClassicGeneratorState
+            caches.eq_prime[gen_idx] = 0.0
+            caches.ed_prime[gen_idx] = 0.0
+            caches.efd[gen_idx] = 0.0
+        elseif results.generator[gen_idx] isa OneDOneQGeneratorState
+            caches.eq_prime[gen_idx] = results.generator[gen_idx].eq_prime[ts+1]
+            caches.ed_prime[gen_idx] = results.generator[gen_idx].ed_prime[ts+1]
+            caches.efd[gen_idx] = results.generator[gen_idx].efd[ts+1]
+        else
+            error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
+        end
     end
     for bus_idx in 1:num_buses(inputs)
         caches.Vr[bus_idx] = results.bus[bus_idx].Vr[ts+1]
@@ -32,6 +46,15 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
     for gen_idx in 1:num_generators(inputs)
         max_dif = max(max_dif, abs(caches.delta[gen_idx] - results.generator[gen_idx].delta[ts+1]))
         max_dif = max(max_dif, abs(caches.omega[gen_idx] - results.generator[gen_idx].omega[ts+1]))
+        if results.generator[gen_idx] isa ClassicGeneratorState
+            continue
+        elseif results.generator[gen_idx] isa OneDOneQGeneratorState
+            max_dif = max(max_dif, abs(caches.eq_prime[gen_idx] - results.generator[gen_idx].eq_prime[ts+1]))
+            max_dif = max(max_dif, abs(caches.ed_prime[gen_idx] - results.generator[gen_idx].ed_prime[ts+1]))
+            max_dif = max(max_dif, abs(caches.efd[gen_idx] - results.generator[gen_idx].efd[ts+1]))
+        else
+            error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
+        end
     end
     for bus_idx in 1:num_buses(inputs)
         max_dif = max(max_dif, abs(caches.Vr[bus_idx] - results.bus[bus_idx].Vr[ts+1]))
@@ -41,16 +64,60 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
     return max_dif < tolerance(inputs)
 end
 
+function predict_voltages!(results::Results, ts::Int)
+    # the Norton current of the OneDOneQ generator is computed from the voltage at ts + 1,
+    # so the first network solution of the step starts from the voltages at ts
+    for state in results.bus
+        state.Vr[ts+1] = state.Vr[ts]
+        state.Vi[ts+1] = state.Vi[ts]
+    end
+    return nothing
+end
+
+function bus_voltages_at(results::Results, ts::Int)
+    V = zeros(ComplexF64, num_buses(results))
+    for (bus_idx, state) in enumerate(results.bus)
+        V[bus_idx] = state.Vr[ts] + im * state.Vi[ts]
+    end
+    return V
+end
+
+function apply_perturbations!(inputs::Inputs, results::Results, ts::Int)
+    # a perturbation at ts changes the voltages and electrical powers at that instant, so the network is
+    # solved again at ts and the step to ts + 1 starts from the values after the perturbation.
+    # The states are continuous and keep their values at ts
+    if !cache_Ybus!(inputs, ts)
+        return nothing
+    end
+    # the Norton current of the OneDOneQ generator depends on V when Xd' differs from Xq', so the network
+    # is solved until the voltages stop changing
+    for iteration in 1:max_iterations(inputs)
+        V_previous = bus_voltages_at(results, ts)
+        solve_network!(inputs, results, ts)
+        V = bus_voltages_at(results, ts)
+        if maximum(abs.(V .- V_previous)) < tolerance(inputs)
+            return nothing
+        end
+    end
+    error("The network did not converge after the perturbations at time step $ts.")
+end
+
+# advances the simulation from the time index ts to ts + 1
 function step!(inputs::Inputs, results::Results, ts::Int)
     caches = StepCache(inputs)
 
-    cache_Ybus!(inputs, ts) # update the Ybus cache and its LU factorization if there are any perturbations at this time step
+    apply_perturbations!(inputs, results, ts) # update Ybus and the network solution at ts if there are perturbations at this instant
 
+    predict_voltages!(results, ts)
     for (generator, state) in zip(inputs.generators, results.generator)
         predict_omega!(inputs, generator, state, ts)
         predict_delta!(inputs, state, ts)
+        if generator isa OneDOneQGenerator
+            predict_ed_prime!(inputs, generator, state, ts)
+            predict_eq_prime!(inputs, generator, state, ts)
+        end
     end
-    solve_network!(inputs, results, ts) # V[ts+1] and Pele[ts+1] from the predicted delta
+    solve_network!(inputs, results, ts + 1) # V[ts+1] and Pele[ts+1] from the predicted states
 
     for iteration in 1:max_iterations(inputs)
         cache_step!(inputs, results, ts, caches) # delta, omega, Vr and Vi at ts+1
@@ -58,8 +125,12 @@ function step!(inputs::Inputs, results::Results, ts::Int)
         for (generator, state) in zip(inputs.generators, results.generator)
             step_omega!(inputs, generator, state, ts)
             step_delta!(inputs, state, ts)
+            if generator isa OneDOneQGenerator
+                step_ed_prime!(inputs, generator, state, ts)
+                step_eq_prime!(inputs, generator, state, ts)
+            end
         end
-        solve_network!(inputs, results, ts)
+        solve_network!(inputs, results, ts + 1)
 
         if step_converged(inputs, results, ts, caches)
             return nothing

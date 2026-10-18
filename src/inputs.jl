@@ -29,9 +29,11 @@ function Inputs(;
     max_iterations::Int = 50,
     buses::Vector{Bus} = Bus[],
     circuits::Vector{Circuit} = Circuit[],
-    generators::Vector{Generator} = Generator[],
-    loads::Vector{Load} = Load[],
-    perturbations::Vector{Perturbation} = Perturbation[],
+    # the vectors of abstract types also accept vectors of a single concrete model, such as [GeneratorTrip(...)],
+    # and the struct converts them to the abstract element type
+    generators::Vector{<:Generator} = Generator[],
+    loads::Vector{<:Load} = Load[],
+    perturbations::Vector{<:Perturbation} = Perturbation[],
     Ybus_cache::SparseMatrixCSC{ComplexF64, Int} = spzeros(ComplexF64, 0, 0),
     Ybus_lu::Union{Nothing, SparseArrays.UMFPACK.UmfpackLU{ComplexF64, Int}} = nothing,
 )
@@ -71,6 +73,17 @@ function num_time_steps(inputs::Inputs)
     return round(Int, simulation_horizon(inputs) / integration_step(inputs))
 end
 
+# The results are stored from t = 0, so the time index ts holds the instant (ts - 1) * integration_step.
+# Every ts passed between functions is this index, and these two functions are the only conversions
+function time_at(inputs::Inputs, ts::Int)
+    return (ts - 1) * integration_step(inputs)
+end
+
+function time_index(inputs::Inputs, time::Float64)
+    # round instead of comparing floats, since time / integration_step is rarely an exact integer
+    return round(Int, time / integration_step(inputs)) + 1
+end
+
 Ybus_cache(inputs::Inputs) = inputs.Ybus_cache
 
 Ybus_lu(inputs::Inputs) = inputs.Ybus_lu
@@ -96,9 +109,8 @@ num_loads(inputs::Inputs) = length(inputs.loads)
 num_perturbations(inputs::Inputs) = length(inputs.perturbations)
 
 function perturbations_at(inputs::Inputs, ts::Int)
-    # round instead of comparing floats, since time / integration_step is rarely an exact integer
     return filter(
-        perturbation -> round(Int, perturbation_time(perturbation) / integration_step(inputs)) == ts,
+        perturbation -> time_index(inputs, perturbation_time(perturbation)) == ts,
         inputs.perturbations,
     )
 end
