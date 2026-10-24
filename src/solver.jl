@@ -154,14 +154,14 @@ function step!(inputs::Inputs, results::Results, ts::Int)
     error("Time step $ts did not converge after $(max_iterations(inputs)) iterations.")
 end
 
-function solve(inputs::Inputs)
+function solve(inputs::Inputs; output_path::String = joinpath(case_path(inputs), "results"))
     results = initialization(inputs)
 
     for ts in 1:num_time_steps(inputs)
         step!(inputs, results, ts)
     end
 
-    write_results(inputs, results)
+    write_results(inputs, results, output_path)
 
     return results
 end

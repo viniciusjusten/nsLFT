@@ -105,7 +105,7 @@ function write_bus_polar_voltages(
     return nothing
 end
 
-function write_results(inputs::Inputs, results::Results, output_path::String = joinpath(case_path(inputs), "results"))
+function write_results(inputs::Inputs, results::Results, output_path::String)
     mkpath(output_path)
     time = time_values(inputs)
 
@@ -117,7 +117,6 @@ function write_results(inputs::Inputs, results::Results, output_path::String = j
     write_class_results(inputs, output_path, "generator", time, generator_names, results.generator)
 
     write_case_description(inputs, results, output_path)
-    write_dashboard(output_path)
 
     return nothing
 end

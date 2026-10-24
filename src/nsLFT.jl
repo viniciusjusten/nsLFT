@@ -18,7 +18,6 @@ include("inputs.jl")
 include("results/results.jl")
 include("results/write.jl")
 include("results/case_description.jl")
-include("results/dashboard.jl")
 
 include("formulation/network.jl")
 include("formulation/generator.jl")
