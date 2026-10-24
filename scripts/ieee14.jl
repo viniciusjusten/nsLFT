@@ -56,8 +56,13 @@ function ieee14_generators(data_path::String, Sb::Float64, generator_model::Stri
         error("Unknown generator model $generator_model.")
     end
     if gov
+        # UG3, UG6 and UG8 are synchronous condensers, which have no turbine and therefore no governor
+        synchronous_condensers = ["UG3", "UG6", "UG8"]
         for gen_idx in eachindex(generators)
-            generators[gen_idx].governor = nsLFT.Droop1stOrder("gov", 0.05, 2.0, 60.0)
+            if generator_names[gen_idx] in synchronous_condensers
+                continue
+            end
+            generators[gen_idx].governor = nsLFT.Droop1stOrder("gov", 0.05, 0.01, 2.0, 60.0)
         end
     end
     return generators
