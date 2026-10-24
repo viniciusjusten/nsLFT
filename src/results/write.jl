@@ -39,6 +39,10 @@ function output_units(inputs::Inputs, field::Symbol)
         return [("pu", 1.0)]
     elseif field == :id || field == :iq
         return [("pu", 1.0)]
+    elseif field == :Vt
+        return [("pu", 1.0)]
+    elseif field == :Vref
+        return [("pu", 1.0)]
     end
     error("No output unit is defined for the field $field.")
 end

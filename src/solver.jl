@@ -129,6 +129,8 @@ function step!(inputs::Inputs, results::Results, ts::Int)
             predict_ed_prime!(inputs, generator, state, ts)
             predict_eq_prime!(inputs, generator, state, ts)
         end
+        predict_efd!(inputs, generator, generator_voltage_regulator(generator), state, ts)
+        update_terminal_voltage!(inputs, generator, results, ts) # Vt[ts+1] from the predicted states
     end
     solve_network!(inputs, results, ts + 1) # V[ts+1] and Pele[ts+1] from the predicted states
 
@@ -144,6 +146,8 @@ function step!(inputs::Inputs, results::Results, ts::Int)
                 step_ed_prime!(inputs, generator, state, ts)
                 step_eq_prime!(inputs, generator, state, ts)
             end
+            step_efd!(inputs, generator, generator_voltage_regulator(generator), state, ts)
+            update_terminal_voltage!(inputs, generator, results, ts) # Vt[ts+1] from the updated states
         end
         solve_network!(inputs, results, ts + 1)
 
