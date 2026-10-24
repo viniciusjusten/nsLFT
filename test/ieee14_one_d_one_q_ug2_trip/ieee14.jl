@@ -1,13 +1,7 @@
 @testset "IEEE 14 with one d one q generators and UG2 trip" begin
-    data_path = joinpath(@__DIR__, "..", "..", "data", "ieee14")
     trip_time = 1.0
     ug2_idx = 2
-    inputs = ieee14_inputs(
-        data_path,
-        @__DIR__;
-        perturbations = ieee14_ug2_trip_perturbations(),
-        generator_model = "one_d_one_q",
-    )
+    inputs = ieee14_inputs(@__DIR__; perturbations = ieee14_ug2_trip_perturbations(), generator_model = "one_d_one_q")
     results = nsLFT.solve(inputs)
 
     # every trajectory matches the one stored in the reference file

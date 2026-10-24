@@ -5,6 +5,7 @@ mutable struct StepCache
     eq_prime::Vector{Float64}
     ed_prime::Vector{Float64}
     efd::Vector{Float64}
+    Pmec_1::Vector{Float64}
     Pmec::Vector{Float64}
     Vr::Vector{Float64}
     Vi::Vector{Float64}
@@ -13,7 +14,7 @@ end
 function StepCache(inputs::Inputs)
     n_generators = num_generators(inputs)
     n_buses = num_buses(inputs)
-    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
+    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
 end
 
 function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCache)
@@ -32,8 +33,10 @@ function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCach
             error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
         end
         if isnothing(results.generator[gen_idx])
+            caches.Pmec_1[gen_idx] = 0.0
             caches.Pmec[gen_idx] = 0.0
         else
+            caches.Pmec_1[gen_idx] = results.generator[gen_idx].Pmec_1[ts+1]
             caches.Pmec[gen_idx] = results.generator[gen_idx].Pmec[ts+1]
         end
     end
@@ -61,6 +64,7 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
         else
             error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
         end
+        max_dif = max(max_dif, abs(caches.Pmec_1[gen_idx] - results.generator[gen_idx].Pmec_1[ts+1]))
         max_dif = max(max_dif, abs(caches.Pmec[gen_idx] - results.generator[gen_idx].Pmec[ts+1]))
     end
     for bus_idx in 1:num_buses(inputs)
@@ -119,6 +123,7 @@ function step!(inputs::Inputs, results::Results, ts::Int)
     for (generator, state) in zip(inputs.generators, results.generator)
         predict_omega!(inputs, generator, state, ts)
         predict_delta!(inputs, state, ts)
+        predict_Pmec_1!(inputs, generator, generator_governor(generator), state, ts)
         predict_Pmec!(inputs, generator, generator_governor(generator), state, ts)
         if generator isa OneDOneQGenerator
             predict_ed_prime!(inputs, generator, state, ts)
@@ -133,6 +138,7 @@ function step!(inputs::Inputs, results::Results, ts::Int)
         for (generator, state) in zip(inputs.generators, results.generator)
             step_omega!(inputs, generator, state, ts)
             step_delta!(inputs, state, ts)
+            step_Pmec_1!(inputs, generator, generator_governor(generator), state, ts)
             step_Pmec!(inputs, generator, generator_governor(generator), state, ts)
             if generator isa OneDOneQGenerator
                 step_ed_prime!(inputs, generator, state, ts)

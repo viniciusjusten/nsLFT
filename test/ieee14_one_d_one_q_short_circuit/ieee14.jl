@@ -1,11 +1,9 @@
 @testset "IEEE 14 with one d one q generators and short circuit at bus 14" begin
-    data_path = joinpath(@__DIR__, "..", "..", "data", "ieee14")
     fault_time = 1.0
     clearing_time = 1.2
     fault_bus_idx = 14
     opened_circuit_idx = 17
     inputs = ieee14_inputs(
-        data_path,
         @__DIR__;
         perturbations = ieee14_short_circuit_perturbations(),
         generator_model = "one_d_one_q",
