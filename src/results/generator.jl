@@ -46,6 +46,7 @@ mutable struct OneDOneQGeneratorState <: GeneratorState
     id::Vector{Float64} # stator current along the d-axis, in pu
     iq::Vector{Float64} # stator current along the q-axis, in pu
     efd::Vector{Float64} # excitation voltage, in pu
+    efdu::Vector{Float64} # excitation voltage before the limiter, in pu
     Vt::Vector{Float64} # terminal voltage, in pu
     Vref::Vector{Float64} # reference voltage of the voltage regulator, in pu
 end
@@ -53,6 +54,7 @@ end
 function OneDOneQGeneratorState(num_steps::Int)
     # NaN keeps a step not yet computed from passing a convergence check by accident
     return OneDOneQGeneratorState(
+        fill(NaN, num_steps),
         fill(NaN, num_steps),
         fill(NaN, num_steps),
         fill(NaN, num_steps),

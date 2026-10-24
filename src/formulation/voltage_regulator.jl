@@ -1,39 +1,38 @@
 # Static 1st order voltage regulator model
-function deriv_efd(inputs::Inputs, generator::Generator, voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
-    return 1 / voltage_regulator_T(inputs, generator, voltage_regulator) * (
-        voltage_regulator_K(inputs, generator, voltage_regulator) *
-        (voltage_regulator_Vref(inputs, generator, voltage_regulator) - state.Vt[ts]) -
-        state.efd[ts]
+function deriv_efdu(voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
+    return 1 / voltage_regulator_T(voltage_regulator) * (
+        voltage_regulator_K(voltage_regulator) *
+        (state.Vref[ts] - state.Vt[ts]) -
+        state.efdu[ts]
     )
 end
 
-function clamp_efd!(inputs::Inputs, generator::Generator, voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
-    state.efd[ts] = clamp(
-        state.efd[ts],
-        voltage_regulator_Lmn(inputs, generator, voltage_regulator),
-        voltage_regulator_Lmx(inputs, generator, voltage_regulator)
+function clamp_efdu(voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
+    return clamp(
+        state.efdu[ts],
+        voltage_regulator_Lmn(voltage_regulator),
+        voltage_regulator_Lmx(voltage_regulator)
     )
-    return nothing
 end
 
 function predict_efd!(inputs::Inputs, generator::Generator, voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
-    # predict the next efd value using the Euler method
-    state.efd[ts+1] =
-        state.efd[ts] +
-        integration_step(inputs) * deriv_efd(inputs, generator, voltage_regulator, state, ts)
-    clamp_efd!(inputs, generator, voltage_regulator, state, ts+1)
+    # predict the next efdu value using the Euler method
+    state.efdu[ts+1] =
+        state.efdu[ts] +
+        integration_step(inputs) * deriv_efdu(voltage_regulator, state, ts)
+    state.efd[ts+1] = clamp_efdu(voltage_regulator, state, ts+1)
     return nothing
 end
 
 function step_efd!(inputs::Inputs, generator::Generator, voltage_regulator::Static1stOrder, state::GeneratorState, ts::Int)
-    # compute the next efd value using the trapezoidal rule
-    state.efd[ts+1] =
-        state.efd[ts] +
+    # compute the next efdu value using the trapezoidal rule
+    state.efdu[ts+1] =
+        state.efdu[ts] +
         integration_step(inputs) / 2 * (
-            deriv_efd(inputs, generator, voltage_regulator, state, ts) +
-            deriv_efd(inputs, generator, voltage_regulator, state, ts+1)
+            deriv_efdu(voltage_regulator, state, ts) +
+            deriv_efdu(voltage_regulator, state, ts+1)
         )
-    clamp_efd!(inputs, generator, voltage_regulator, state, ts+1)
+    state.efd[ts+1] = clamp_efdu(voltage_regulator, state, ts+1)
     return nothing
 end
 
@@ -47,21 +46,13 @@ function step_efd!(::Inputs, ::ClassicGenerator, ::Nothing, state::GeneratorStat
 end
 
 function predict_efd!(::Inputs, ::OneDOneQGenerator, ::Nothing, state::GeneratorState, ts::Int)
+    state.efdu[ts+1] = state.efdu[ts]
     state.efd[ts+1] = state.efd[ts]
     return nothing
 end
 
 function step_efd!(::Inputs, ::OneDOneQGenerator, ::Nothing, state::GeneratorState, ts::Int)
+    state.efdu[ts+1] = state.efdu[ts]
     state.efd[ts+1] = state.efd[ts]
-    return nothing
-end
-
-# terminal voltage of the generator is the voltage at the bus to which it is connected
-function update_terminal_voltage!(inputs::Inputs, generator::Generator, results::Results, ts::Int)
-    bus_idx = generator_bus(generator)
-    Vr = results.bus[bus_idx].Vr[ts+1]
-    Vi = results.bus[bus_idx].Vi[ts+1]
-    gen_idx = findfirst(isequal(generator), inputs.generators)
-    results.generator[gen_idx].Vt[ts+1] = sqrt(Vr^2 + Vi^2)
     return nothing
 end

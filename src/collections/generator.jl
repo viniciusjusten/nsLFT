@@ -110,7 +110,7 @@ function OneDOneQGenerator(;
     P0::Float64,
     Q0::Float64,
     governor::Union{Nothing, Governor} = nothing,
-    voltage_regulator::Union{Nothing, VoltageRegulator} = nothing
+    voltage_regulator::Union{Nothing, VoltageRegulator} = nothing,
 )
     return OneDOneQGenerator(
         name,
