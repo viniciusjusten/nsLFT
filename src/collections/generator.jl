@@ -22,6 +22,7 @@ mutable struct ClassicGenerator <: Generator
 
     # Controls
     governor::Union{Nothing, Governor} # speed governor, nothing keeps the mechanical power constant
+    voltage_regulator::Nothing # classic generators do not have a voltage regulator. This is kept for the multiple dispatch to work
 
     # Cache
     tripped::Bool # indicates if the generator has been tripped
@@ -52,6 +53,7 @@ function ClassicGenerator(;
         P0,
         Q0,
         governor,
+        nothing,
         false,
     )
 end
@@ -85,6 +87,7 @@ mutable struct OneDOneQGenerator <: Generator
 
     # Controls
     governor::Union{Nothing, Governor} # speed governor, nothing keeps the mechanical power constant
+    voltage_regulator::Union{Nothing, VoltageRegulator} # voltage regulator, nothing keeps the field voltage constant
 
     # Cache
     tripped::Bool # indicates if the generator has been tripped
@@ -107,6 +110,7 @@ function OneDOneQGenerator(;
     P0::Float64,
     Q0::Float64,
     governor::Union{Nothing, Governor} = nothing,
+    voltage_regulator::Union{Nothing, VoltageRegulator} = nothing,
 )
     return OneDOneQGenerator(
         name,
@@ -125,6 +129,7 @@ function OneDOneQGenerator(;
         P0,
         Q0,
         governor,
+        voltage_regulator,
         false,
     )
 end
@@ -165,6 +170,10 @@ generator_tripped(generator::Generator) = generator.tripped
 generator_governor(generator::Generator) = generator.governor
 
 has_governor(generator::Generator) = !isnothing(generator.governor)
+
+generator_voltage_regulator(generator::Generator) = generator.voltage_regulator
+
+has_voltage_regulator(generator::Generator) = !isnothing(generator.voltage_regulator)
 
 function generator_impedance(inputs, generator::ClassicGenerator)
     return generator_Ra(inputs, generator) + im * generator_Xd_prime(inputs, generator)

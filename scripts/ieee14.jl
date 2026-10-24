@@ -462,7 +462,7 @@ function ieee14_one_d_one_q_generators()
 end
 
 # the generator model is "classic" or "one_d_one_q", and the same model is used for every generator of the case
-function ieee14_generators(generator_model::String, gov::Bool)
+function ieee14_generators(generator_model::String, gov::Bool, avr::Bool)
     generators = nsLFT.Generator[]
     if generator_model == "classic"
         generators = ieee14_classic_generators()
@@ -478,6 +478,19 @@ function ieee14_generators(generator_model::String, gov::Bool)
             nsLFT.Droop1stOrder(; name = "UG1 gov", R = 0.05, Tc = 0.01, Tr = 2.0, omega_ref = 60.0)
         generators[2].governor =
             nsLFT.Droop1stOrder(; name = "UG2 gov", R = 0.05, Tc = 0.01, Tr = 2.0, omega_ref = 60.0)
+    end
+
+    # Every machine has a voltage regulator, including the synchronous condensers, whose only role is to hold the
+    # voltage of their bus. The classic model keeps E' constant, so it takes no voltage regulator
+    if avr
+        if generator_model == "classic"
+            error("The classic generator model has no voltage regulator.")
+        end
+        for generator in generators
+            regulator_name = "$(nsLFT.generator_name(generator)) avr"
+            generator.voltage_regulator =
+                nsLFT.Static1stOrder(; name = regulator_name, K = 50.0, T = 0.05, Lmn = -5.0, Lmx = 5.0)
+        end
     end
     return generators
 end
@@ -504,6 +517,7 @@ function ieee14_inputs(
     perturbations::Vector{<:nsLFT.Perturbation} = nsLFT.Perturbation[],
     generator_model::String = "classic",
     gov::Bool = false,
+    avr::Bool = false,
 )
     return nsLFT.Inputs(;
         case_path = case_path,
@@ -514,7 +528,7 @@ function ieee14_inputs(
         tolerance = 1e-10,
         buses = ieee14_buses(),
         circuits = ieee14_circuits(),
-        generators = ieee14_generators(generator_model, gov),
+        generators = ieee14_generators(generator_model, gov, avr),
         loads = ieee14_loads(),
         perturbations = perturbations,
     )

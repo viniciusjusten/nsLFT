@@ -197,3 +197,11 @@ function electrical_power(
     Pele = (vq + Ra * state.iq[ts]) * state.iq[ts] + (vd + Ra * state.id[ts]) * state.id[ts]
     return Pele
 end
+
+# terminal voltage of the generator is the voltage at the bus to which it is connected
+function terminal_voltage(inputs::Inputs, generator::Generator, results::Results, ts::Int)
+    bus_idx = generator_bus(generator)
+    Vr = results.bus[bus_idx].Vr[ts]
+    Vi = results.bus[bus_idx].Vi[ts]
+    return sqrt(Vr^2 + Vi^2)
+end
