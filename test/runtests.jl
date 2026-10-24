@@ -12,4 +12,6 @@ include(joinpath(@__DIR__, "ieee14_perturbations.jl"))
     include(joinpath("ieee14_short_circuit", "ieee14.jl"))
     include(joinpath("ieee14_one_d_one_q_ug2_trip", "ieee14.jl"))
     include(joinpath("ieee14_one_d_one_q_short_circuit", "ieee14.jl"))
+    include(joinpath("ieee14_one_d_one_q_governor_ug2_trip", "ieee14.jl"))
+    include(joinpath("ieee14_one_d_one_q_governor_short_circuit", "ieee14.jl"))
 end
