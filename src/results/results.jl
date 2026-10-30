@@ -6,7 +6,7 @@ end
 function Results(inputs::Inputs)
     num_steps = num_time_steps(inputs) + 1
 
-    generator_states = GeneratorState[generator_state(gen, num_steps) for gen in inputs.generators]
+    generator_states = GeneratorState[allocate_generator_state(gen, num_steps) for gen in inputs.generators]
     bus_states = [BusState(num_steps) for _ in inputs.buses]
 
     return Results(generator_states, bus_states)

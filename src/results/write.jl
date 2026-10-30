@@ -2,21 +2,41 @@ function time_values(inputs::Inputs)
     return [time_at(inputs, ts) for ts in 1:num_time_steps(inputs)+1]
 end
 
-function is_time_series(state, field::Symbol)
-    if !hasfield(typeof(state), field)
-        return false
+# the variables of a state as pairs of name and value, including the variables of the control states nested in it,
+# so the states of the governor and of the voltage regulator are written with the generator they belong to
+function state_variables(state)
+    variables = Pair{Symbol, Any}[]
+    for field in fieldnames(typeof(state))
+        value = getfield(state, field)
+        if value isa ControlState
+            nested_variables = state_variables(value)
+            append!(variables, nested_variables)
+        else
+            push!(variables, field => value)
+        end
     end
-    return fieldtype(typeof(state), field) == Vector{Float64}
+    return variables
 end
 
-# collects the time series fields of all states, so element types with different models
+# the time series of a state as pairs of name and values, including those of its control states
+function time_series(state)
+    series = Pair{Symbol, Vector{Float64}}[]
+    for (name, value) in state_variables(state)
+        if value isa Vector{Float64}
+            push!(series, name => value)
+        end
+    end
+    return series
+end
+
+# collects the names of the time series of all states, so element types with different models
 # can share a file for the quantities they have in common
 function time_series_fields(states::Vector)
     fields = Symbol[]
     for state in states
-        for field in fieldnames(typeof(state))
-            if is_time_series(state, field) && !(field in fields)
-                push!(fields, field)
+        for (name, _) in time_series(state)
+            if !(name in fields)
+                push!(fields, name)
             end
         end
     end
@@ -70,9 +90,11 @@ function write_class_results(
             column_names = String[]
             columns = Vector{Float64}[]
             for (element_idx, state) in enumerate(states)
-                if is_time_series(state, field)
-                    push!(column_names, element_names[element_idx])
-                    push!(columns, getfield(state, field) .* factor)
+                for (name, values) in time_series(state)
+                    if name == field
+                        push!(column_names, element_names[element_idx])
+                        push!(columns, values .* factor)
+                    end
                 end
             end
             write_csv(joinpath(output_path, "$(class_name)_$(field)_$(unit).csv"), time, column_names, columns)

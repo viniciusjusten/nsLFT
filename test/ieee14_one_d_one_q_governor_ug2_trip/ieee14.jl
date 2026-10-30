@@ -15,9 +15,10 @@
     # is initialized to hold the mechanical power at the power flow solution
     test_initial_operating_point_kept(inputs, results, trip_time)
 
-    # the reference power is a setpoint, so it stays constant during the whole simulation
-    for state in results.generator
-        @test all(state.Pref .== state.Pref[1])
+    # UG1 and UG2 have governors, whose reference power is a setpoint, so it stays constant during the whole simulation
+    for gen_idx in (1, 2)
+        governor_state = results.generator[gen_idx].governor
+        @test all(governor_state.Pref .== governor_state.Pref[1])
     end
 
     # UG3, UG6 and UG8 are synchronous condensers without governor, so their mechanical power stays constant
@@ -25,6 +26,7 @@
         generator = nsLFT.get_generator(inputs, gen_idx)
         state = results.generator[gen_idx]
         @test !nsLFT.has_governor(generator)
+        @test isnothing(state.governor)
         @test all(state.Pmec .== state.Pmec[1])
     end
 

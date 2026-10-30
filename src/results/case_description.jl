@@ -201,11 +201,11 @@ function generator_parameters(generator::OneDOneQGenerator)
     ]
 end
 
-# every state variable of the model is listed with its value at t = 0, so a new model needs no change here
+# every state variable of the model and of its controls is listed with its value at t = 0, so a new model needs no
+# change here
 function generator_state_values(inputs::Inputs, state::GeneratorState)
     values = Any[]
-    for field in fieldnames(typeof(state))
-        value = getfield(state, field)
+    for (field, value) in state_variables(state)
         initial = NaN
         if value isa Vector{Float64}
             initial = value[1]

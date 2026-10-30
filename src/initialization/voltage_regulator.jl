@@ -1,31 +1,32 @@
 # Static 1st order voltage regulator model
-function initialize_voltage_regulator!(inputs::Inputs, generator::Generator, voltage_regulator::Static1stOrder, state::GeneratorState)
+function initialize_voltage_regulator!(
+    inputs::Inputs,
+    generator::Generator,
+    voltage_regulator::Static1stOrder,
+    voltage_regulator_state::Static1stOrderState,
+    state::GeneratorState,
+)
     efd = state.efd[1]
     if !(efd >= voltage_regulator_Lmn(voltage_regulator) && efd <= voltage_regulator_Lmx(voltage_regulator))
         error("Initial field voltage (efd = $efd) is outside the limits of the voltage regulator (Lmn = $(voltage_regulator_Lmn(voltage_regulator)), Lmx = $(voltage_regulator_Lmx(voltage_regulator)))")
     end
-    state.efdu[1] = efd
-    state.Vref[1] = state.Vt[1] + efd / voltage_regulator_K(voltage_regulator)
-    for ts in 2:length(state.Vref)
-        state.Vref[ts] = state.Vref[1]
+    voltage_regulator_state.efdu[1] = efd
+    voltage_regulator_state.Vref[1] = state.Vt[1] + efd / voltage_regulator_K(voltage_regulator)
+    for ts in 2:length(voltage_regulator_state.Vref)
+        voltage_regulator_state.Vref[ts] = voltage_regulator_state.Vref[1]
     end
     return nothing
 end
 
-# without a voltage regulator the field voltage stays at its initial value
-function initialize_voltage_regulator!(inputs::Inputs, generator::ClassicGenerator, ::Nothing, state::GeneratorState)
-    return nothing
-end
-
-function initialize_voltage_regulator!(inputs::Inputs, generator::OneDOneQGenerator, ::Nothing, state::GeneratorState)
-    state.efdu[1] = state.efd[1]
-    state.Vref .= state.Vt[1]
+# without a voltage regulator the field voltage stays at its initial value and there is no state to initialize
+function initialize_voltage_regulator!(::Inputs, ::Generator, ::Nothing, ::Nothing, ::GeneratorState)
     return nothing
 end
 
 function initialize_voltage_regulators!(inputs::Inputs, results::Results)
     for (generator, state) in zip(inputs.generators, results.generator)
-        initialize_voltage_regulator!(inputs, generator, generator_voltage_regulator(generator), state)
+        voltage_regulator = generator_voltage_regulator(generator)
+        initialize_voltage_regulator!(inputs, generator, voltage_regulator, state.voltage_regulator, state)
     end
     return nothing
 end

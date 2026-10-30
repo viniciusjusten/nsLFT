@@ -16,10 +16,10 @@
     # and the reference voltage of each regulator are initialized at the power flow solution
     test_initial_operating_point_kept(inputs, results, trip_time)
 
-    # the reference power and the reference voltage are setpoints, so they stay constant during the whole simulation
-    for state in results.generator
-        @test all(state.Pref .== state.Pref[1])
-        @test all(state.Vref .== state.Vref[1])
+    # UG1 and UG2 have governors, whose reference power is a setpoint, so it stays constant during the whole simulation
+    for gen_idx in (1, 2)
+        governor_state = results.generator[gen_idx].governor
+        @test all(governor_state.Pref .== governor_state.Pref[1])
     end
 
     # UG3, UG6 and UG8 are synchronous condensers without governor, so their mechanical power stays constant
@@ -27,6 +27,7 @@
         generator = nsLFT.get_generator(inputs, gen_idx)
         state = results.generator[gen_idx]
         @test !nsLFT.has_governor(generator)
+        @test isnothing(state.governor)
         @test all(state.Pmec .== state.Pmec[1])
     end
 
@@ -36,14 +37,16 @@
     @test ug1.Pmec[end] != ug1.Pmec[1]
     @test (ug1.Pmec[end] - ug1.Pmec[1]) * (ug1.omega[end] - 1.0) < 0.0
 
-    # every machine has a voltage regulator, including the synchronous condensers UG3, UG6 and UG8, and the field
-    # voltage is the limited output of the lag at every instant
+    # Every machine has a voltage regulator, including the synchronous condensers UG3, UG6 and UG8. The reference
+    # voltage is a setpoint, so it stays constant, and the field voltage is the limited output of the lag at every instant
     for (generator, state) in zip(inputs.generators, results.generator)
         @test nsLFT.has_voltage_regulator(generator)
         voltage_regulator = nsLFT.generator_voltage_regulator(generator)
         Lmn = nsLFT.voltage_regulator_Lmn(voltage_regulator)
         Lmx = nsLFT.voltage_regulator_Lmx(voltage_regulator)
-        limited_efdu = clamp.(state.efdu, Lmn, Lmx)
+        voltage_regulator_state = state.voltage_regulator
+        @test all(voltage_regulator_state.Vref .== voltage_regulator_state.Vref[1])
+        limited_efdu = clamp.(voltage_regulator_state.efdu, Lmn, Lmx)
         @test all(state.efd .== limited_efdu)
     end
 

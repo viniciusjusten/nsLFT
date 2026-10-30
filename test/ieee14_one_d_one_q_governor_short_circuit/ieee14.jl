@@ -28,11 +28,16 @@
     fault_voltage = abs.(fault_bus.Vr[during_fault] .+ im .* fault_bus.Vi[during_fault])
     @test maximum(fault_voltage) < 1e-3
 
-    # the excitation voltage of every generator stays constant, since there is no voltage regulator,
-    # and the reference power is a setpoint, so it also stays constant
+    # the excitation voltage of every generator stays constant, since there is no voltage regulator
     for state in results.generator
         @test all(state.efd .== state.efd[1])
-        @test all(state.Pref .== state.Pref[1])
+        @test isnothing(state.voltage_regulator)
+    end
+
+    # UG1 and UG2 have governors, whose reference power is a setpoint, so it stays constant
+    for gen_idx in (1, 2)
+        governor_state = results.generator[gen_idx].governor
+        @test all(governor_state.Pref .== governor_state.Pref[1])
     end
 
     # UG3, UG6 and UG8 are synchronous condensers without governor, so their mechanical power stays constant
@@ -40,19 +45,21 @@
         generator = nsLFT.get_generator(inputs, gen_idx)
         state = results.generator[gen_idx]
         @test !nsLFT.has_governor(generator)
+        @test isnothing(state.governor)
         @test all(state.Pmec .== state.Pmec[1])
     end
 
     # The governor of UG1 moves the valve against the speed deviation, as the droop requires. At the highest speed
     # after the fault the valve is below its initial position, and at the lowest speed it is above it
     ug1 = results.generator[1]
+    ug1_governor = ug1.governor
     @test nsLFT.has_governor(nsLFT.get_generator(inputs, 1))
     highest_speed_idx = argmax(ug1.omega)
     lowest_speed_idx = argmin(ug1.omega)
     @test ug1.omega[highest_speed_idx] > 1.0
-    @test ug1.Pmec_1[highest_speed_idx] < ug1.Pmec_1[1]
+    @test ug1_governor.Pmec_1[highest_speed_idx] < ug1_governor.Pmec_1[1]
     @test ug1.omega[lowest_speed_idx] < 1.0
-    @test ug1.Pmec_1[lowest_speed_idx] > ug1.Pmec_1[1]
+    @test ug1_governor.Pmec_1[lowest_speed_idx] > ug1_governor.Pmec_1[1]
 
     # at the end the fault is removed and the line LT13-14 is open
     @test nsLFT.bus_fault_admittance(nsLFT.get_bus(inputs, fault_bus_idx)) == 0.0 + 0.0im

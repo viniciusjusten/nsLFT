@@ -32,12 +32,13 @@ function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCach
         else
             error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
         end
-        if isnothing(results.generator[gen_idx])
+        caches.Pmec[gen_idx] = results.generator[gen_idx].Pmec[ts+1]
+        # Pmec_1 belongs to the governor, so only the generators with a governor have it
+        governor_state = results.generator[gen_idx].governor
+        if isnothing(governor_state)
             caches.Pmec_1[gen_idx] = 0.0
-            caches.Pmec[gen_idx] = 0.0
         else
-            caches.Pmec_1[gen_idx] = results.generator[gen_idx].Pmec_1[ts+1]
-            caches.Pmec[gen_idx] = results.generator[gen_idx].Pmec[ts+1]
+            caches.Pmec_1[gen_idx] = governor_state.Pmec_1[ts+1]
         end
     end
     for bus_idx in 1:num_buses(inputs)
@@ -64,7 +65,10 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
         else
             error("Unknown generator state type: $(typeof(results.generator[gen_idx]))")
         end
-        max_dif = max(max_dif, abs(caches.Pmec_1[gen_idx] - results.generator[gen_idx].Pmec_1[ts+1]))
+        governor_state = results.generator[gen_idx].governor
+        if !isnothing(governor_state)
+            max_dif = max(max_dif, abs(caches.Pmec_1[gen_idx] - governor_state.Pmec_1[ts+1]))
+        end
         max_dif = max(max_dif, abs(caches.Pmec[gen_idx] - results.generator[gen_idx].Pmec[ts+1]))
     end
     for bus_idx in 1:num_buses(inputs)
@@ -121,15 +125,17 @@ function step!(inputs::Inputs, results::Results, ts::Int)
 
     predict_voltages!(results, ts)
     for (generator, state) in zip(inputs.generators, results.generator)
+        governor = generator_governor(generator)
+        voltage_regulator = generator_voltage_regulator(generator)
         predict_omega!(inputs, generator, state, ts)
         predict_delta!(inputs, state, ts)
-        predict_Pmec_1!(inputs, generator, generator_governor(generator), state, ts)
-        predict_Pmec!(inputs, generator, generator_governor(generator), state, ts)
+        predict_Pmec_1!(inputs, generator, governor, state.governor, state, ts)
+        predict_Pmec!(inputs, generator, governor, state.governor, state, ts)
         if generator isa OneDOneQGenerator
             predict_ed_prime!(inputs, generator, state, ts)
             predict_eq_prime!(inputs, generator, state, ts)
         end
-        predict_efd!(inputs, generator, generator_voltage_regulator(generator), state, ts)
+        predict_efd!(inputs, generator, voltage_regulator, state.voltage_regulator, state, ts)
     end
     solve_network!(inputs, results, ts + 1) # V[ts+1] and Pele[ts+1] from the predicted states
 
@@ -137,15 +143,17 @@ function step!(inputs::Inputs, results::Results, ts::Int)
         cache_step!(inputs, results, ts, caches) # delta, omega, Vr and Vi at ts+1
 
         for (generator, state) in zip(inputs.generators, results.generator)
+            governor = generator_governor(generator)
+            voltage_regulator = generator_voltage_regulator(generator)
             step_omega!(inputs, generator, state, ts)
             step_delta!(inputs, state, ts)
-            step_Pmec_1!(inputs, generator, generator_governor(generator), state, ts)
-            step_Pmec!(inputs, generator, generator_governor(generator), state, ts)
+            step_Pmec_1!(inputs, generator, governor, state.governor, state, ts)
+            step_Pmec!(inputs, generator, governor, state.governor, state, ts)
             if generator isa OneDOneQGenerator
                 step_ed_prime!(inputs, generator, state, ts)
                 step_eq_prime!(inputs, generator, state, ts)
             end
-            step_efd!(inputs, generator, generator_voltage_regulator(generator), state, ts)
+            step_efd!(inputs, generator, voltage_regulator, state.voltage_regulator, state, ts)
         end
         solve_network!(inputs, results, ts + 1)
 

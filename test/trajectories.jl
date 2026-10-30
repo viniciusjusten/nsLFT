@@ -12,11 +12,10 @@ function add_state_trajectories!(
     element_name::String,
     state,
 )
-    for field in fieldnames(typeof(state))
-        if nsLFT.is_time_series(state, field)
-            push!(column_names, "$(class_name)_$(element_name)_$(field)")
-            push!(columns, getfield(state, field))
-        end
+    # the time series include those of the control states, such as the governor and the voltage regulator
+    for (field, values) in nsLFT.time_series(state)
+        push!(column_names, "$(class_name)_$(element_name)_$(field)")
+        push!(columns, values)
     end
     return nothing
 end
@@ -69,14 +68,35 @@ function reference_trajectories(reference_trajectories_path::String)
     return column_names, columns
 end
 
+# Before the control states had their own structs, every generator kept the governor trajectories Pmec_1 and Pref,
+# which stayed constant when it had no governor. The references written then still have these columns, and a
+# generator without governor no longer produces them
+function trajectories_of_absent_governors(inputs::nsLFT.Inputs)
+    names = String[]
+    for generator in inputs.generators
+        if nsLFT.has_governor(generator)
+            continue
+        end
+        generator_name = nsLFT.generator_name(generator)
+        push!(names, "generator_$(generator_name)_Pmec_1")
+        push!(names, "generator_$(generator_name)_Pref")
+    end
+    return names
+end
+
 function test_trajectories(inputs::nsLFT.Inputs, results::nsLFT.Results, reference_trajectories_path::String)
     # the model trajectories come from the simulation results and the reference trajectories from the fixed CSV file
     model_time = nsLFT.time_values(inputs)
     model_names, model_columns = model_trajectories(inputs, results)
     reference_names, reference_columns = reference_trajectories(reference_trajectories_path)
 
-    # the reference has the time followed by exactly the trajectories the model produces
+    # the reference has the time followed by the trajectories the model produces, apart from the governor
+    # trajectories of the generators without governor
+    absent_governor_names = trajectories_of_absent_governors(inputs)
     for hdr in reference_names
+        if hdr in absent_governor_names
+            continue
+        end
         @test hdr in ["time_s"; model_names]
     end
     @test reference_columns[1] ≈ model_time
