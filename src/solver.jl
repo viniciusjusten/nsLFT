@@ -9,12 +9,14 @@ mutable struct StepCache
     Pmec::Vector{Float64}
     Vr::Vector{Float64}
     Vi::Vector{Float64}
+    x_theta::Vector{Float64}
+    omega_estim::Vector{Float64}
 end
 
 function StepCache(inputs::Inputs)
     n_generators = num_generators(inputs)
     n_buses = num_buses(inputs)
-    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses))
+    return StepCache(zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_generators), zeros(n_buses), zeros(n_buses), zeros(n_buses), zeros(n_buses))
 end
 
 function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCache)
@@ -44,6 +46,16 @@ function cache_step!(inputs::Inputs, results::Results, ts::Int, caches::StepCach
     for bus_idx in 1:num_buses(inputs)
         caches.Vr[bus_idx] = results.bus[bus_idx].Vr[ts+1]
         caches.Vi[bus_idx] = results.bus[bus_idx].Vi[ts+1]
+        # x_theta and the estimated omega belong to the frequency estimation, so only the buses with an estimation
+        # have them
+        freq_estimation_state = results.bus[bus_idx].freq_estimation
+        if isnothing(freq_estimation_state)
+            caches.x_theta[bus_idx] = 0.0
+            caches.omega_estim[bus_idx] = 0.0
+        else
+            caches.x_theta[bus_idx] = freq_estimation_state.x_theta[ts+1]
+            caches.omega_estim[bus_idx] = freq_estimation_state.omega[ts+1]
+        end
     end
     return nothing
 end
@@ -74,6 +86,11 @@ function step_converged(inputs::Inputs, results::Results, ts::Int, caches::StepC
     for bus_idx in 1:num_buses(inputs)
         max_dif = max(max_dif, abs(caches.Vr[bus_idx] - results.bus[bus_idx].Vr[ts+1]))
         max_dif = max(max_dif, abs(caches.Vi[bus_idx] - results.bus[bus_idx].Vi[ts+1]))
+        freq_estimation_state = results.bus[bus_idx].freq_estimation
+        if !isnothing(freq_estimation_state)
+            max_dif = max(max_dif, abs(caches.x_theta[bus_idx] - freq_estimation_state.x_theta[ts+1]))
+            max_dif = max(max_dif, abs(caches.omega_estim[bus_idx] - freq_estimation_state.omega[ts+1]))
+        end
     end
 
     return max_dif < tolerance(inputs)
@@ -137,6 +154,10 @@ function step!(inputs::Inputs, results::Results, ts::Int)
         end
         predict_efd!(inputs, generator, voltage_regulator, state.voltage_regulator, state, ts)
     end
+    for (bus, bus_state) in zip(inputs.buses, results.bus)
+        freq_estimation = bus_freq_estimation(bus)
+        predict_bus_freq_estimation!(inputs, freq_estimation, bus_state.freq_estimation, bus_state, ts)
+    end
     solve_network!(inputs, results, ts + 1) # V[ts+1] and Pele[ts+1] from the predicted states
 
     for iteration in 1:max_iterations(inputs)
@@ -154,6 +175,10 @@ function step!(inputs::Inputs, results::Results, ts::Int)
                 step_eq_prime!(inputs, generator, state, ts)
             end
             step_efd!(inputs, generator, voltage_regulator, state.voltage_regulator, state, ts)
+        end
+        for (bus, bus_state) in zip(inputs.buses, results.bus)
+            freq_estimation = bus_freq_estimation(bus)
+            step_bus_freq_estimation!(inputs, freq_estimation, bus_state.freq_estimation, bus_state, ts)
         end
         solve_network!(inputs, results, ts + 1)
 

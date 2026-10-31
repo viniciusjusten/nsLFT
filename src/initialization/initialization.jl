@@ -35,6 +35,7 @@ function initialization(inputs::Inputs)
     solve_network!(inputs, results, 1) # V and Pele at t = 0 from the initial states
     initialize_mechanical_powers!(inputs, results)
     initialize_voltage_regulators!(inputs, results)
+    initialize_bus_freq_estimations!(inputs, results)
 
     return results
 end

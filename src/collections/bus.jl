@@ -8,6 +8,9 @@ mutable struct Bus
     angle::Float64 # voltage angle at the power flow solution, in rad
     shunt_susceptance::Float64 # shunt susceptance, in pu
 
+    # Measurements
+    freq_estimation::Union{Nothing, BusFreqEstimation} # frequency estimation of the bus, nothing when it is not estimated
+
     # Cache
     fault_admittance::ComplexF64 # shunt admittance of an applied short circuit, zero without a fault, in pu
 end
@@ -19,6 +22,7 @@ function Bus(;
     shunt_susceptance::Float64,
     generator_idx::Union{Int, Nothing} = nothing,
     load_idx::Union{Int, Nothing} = nothing,
+    freq_estimation::Union{Nothing, BusFreqEstimation} = nothing,
 )
     return Bus(
         name,
@@ -27,6 +31,7 @@ function Bus(;
         voltage,
         angle,
         shunt_susceptance,
+        freq_estimation,
         0.0 + 0.0im,
     )
 end
@@ -42,5 +47,9 @@ bus_voltage(bus::Bus) = bus.voltage
 bus_angle(bus::Bus) = bus.angle
 
 bus_shunt_susceptance(bus::Bus) = bus.shunt_susceptance
+
+bus_freq_estimation(bus::Bus) = bus.freq_estimation
+
+has_freq_estimation(bus::Bus) = !isnothing(bus.freq_estimation)
 
 bus_fault_admittance(bus::Bus) = bus.fault_admittance

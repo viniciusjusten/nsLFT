@@ -44,14 +44,18 @@ function time_series_fields(states::Vector)
 end
 
 # the units each time series field is written in, as (unit name, factor that converts the stored value to it).
-# The stored values are in pu, except delta, which has no pu value and is stored in rad
+# The stored values are in pu, except the angles delta and theta_estim, which have no pu value and are stored in rad.
+# A field with no units is not written
 function output_units(inputs::Inputs, field::Symbol)
     if field == :Vr || field == :Vi
         # the buses have no base voltage yet, so the voltages are only written in pu
         return [("pu", 1.0)]
-    elseif field == :delta
+    elseif field == :delta || field == :theta_estim
         return [("rad", 1.0), ("deg", 180 / pi)]
-    elseif field == :omega
+    elseif field == :x_theta
+        # x_theta is an internal state of the filtered derivative of the frequency estimation, so it is not written
+        return Tuple{String, Float64}[]
+    elseif field == :omega || field == :d_omega
         return [("pu", 1.0), ("Hz", fb(inputs))]
     elseif field == :Pmec_1 || field == :Pmec || field == :Pref || field == :Pele
         return [("pu", 1.0), ("MW", Sb(inputs))]
